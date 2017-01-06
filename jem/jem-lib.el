@@ -2,6 +2,10 @@
 
 (require 'jem-definitions)
 
+(defun jem-elapsed-time ()
+  "Returns the elapsed time between `current-time' and `jem-start-time'."
+  (time-subtract (current-time) jem-start-time))
+
 (defun jem-init ()
   "Initializes jem."
   ;; TODO: Write message in jem-buffer.
@@ -15,7 +19,25 @@
   (jem--use-space-indentation)
 
   (require 'jem-buffer-lib)
-  (jem-show-dashboard))
+  (jem-show-dashboard)
+
+  (if (file-exists-p (expand-file-name "~/.custom.el"))
+      (progn
+        (jem-add-log-to-dashboard "Loading .custom.el")
+        (load "~/.custom.el")))
+
+  (require 'package)
+  (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+  (package-initialize)
+
+  (require 'evil)
+  (evil-mode 1)
+  (jem-add-log-to-dashboard "Activated evil")
+
+  (if (and (fboundp 'server-running-p)
+           (not (server-running-p)))
+      (server-start))
+  (jem-add-log-to-dashboard "Started emacs server."))
 
 (defun jem--redefine-base-buffers ()
   "Redefines configuration for base buffers such as *Messages* and *scratch*."
