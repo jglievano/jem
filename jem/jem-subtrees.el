@@ -11,9 +11,14 @@
                    (default-directory user-emacs-directory))
               (if (not (file-exists-p path))
                   (progn
+                    (jem-log (format "mkdir -pv %s" path))
                     (shell-command (format "mkdir -pv %s" path))
+                    (jem-log (format "git remote add -f %s %s" subtree url))
                     (shell-command (format "git remote add -f %s %s"
                                            subtree url))
+                    (jem-log (format
+                              "git subtree add --prefix %s %s master --squash"
+                              path subtree))
                     (shell-command
                      (format "git subtree add --prefix %s %s master --squash"
                              path subtree)))))) jem-subtrees-list))
