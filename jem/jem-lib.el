@@ -29,6 +29,11 @@
         (load "~/.custom.el")))
 
   (require 'use-package)
+  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                           ("gnu" . "https://elpa.gnu.org/packages/")
+                           ("marmalade" . "https://marmalade-repo.org/packages")
+                           ("elpa" . "https://elpa.org/packages/")))
+     
   ;; Loading packages from +root is mandatory.
   (mapcar
    (lambda (dir)

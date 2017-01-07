@@ -2,7 +2,7 @@
 
 (defun jem-root-evil|init ()
   (use-package evil
-    :ensure evil
+    :ensure t
     :config
     (evil-mode 1)))
 

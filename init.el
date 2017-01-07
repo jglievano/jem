@@ -21,7 +21,7 @@
     (mapc #'(lambda (path)
               (add-to-list 'load-path
                            (expand-file-name path user-emacs-directory)))
-          '("jem" "third-party/use-package")))
+          '("jem" "jem/libs" "third-party/use-package")))
 
   (require 'jem-lib)
   (jem-init))
