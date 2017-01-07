@@ -26,8 +26,13 @@
         (jem-log "Loading .custom.el")
         (load "~/.custom.el")))
 
+  (require 'jem-subtrees)
+  (jem-install-subtrees)
+
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+  (add-to-list 'package-archives '("org"   . "http://orgmode.org/elpa/"))
+  (add-to-list 'package-archives '("gnu"   . "http://elpa.gnu.org/packages/"))
   (package-initialize)
 
   (require 'evil)
