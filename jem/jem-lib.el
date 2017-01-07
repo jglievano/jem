@@ -32,9 +32,6 @@
   (add-to-list 'package-archives '("gnu"   . "http://elpa.gnu.org/packages/"))
   (package-initialize)
 
-  (require 'jem-subtrees)
-  (jem-install-subtrees)
-
   (require 'evil)
   (evil-mode 1)
   (jem-log "Activated evil.")
