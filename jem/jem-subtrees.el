@@ -11,6 +11,7 @@
                    (default-directory user-emacs-directory))
               (if (not (file-exists-p path))
                   (progn
+                    (shell-command (format "mkdir -pv %s" path))
                     (shell-command (format "git remote add -f %s %s"
                                            subtree url))
                     (shell-command
