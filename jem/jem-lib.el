@@ -23,7 +23,7 @@
 
   (if (file-exists-p (expand-file-name "~/.custom.el"))
       (progn
-        (jem-add-log-to-dashboard "Loading .custom.el")
+        (jem-log "Loading .custom.el")
         (load "~/.custom.el")))
 
   (require 'package)
@@ -32,12 +32,12 @@
 
   (require 'evil)
   (evil-mode 1)
-  (jem-add-log-to-dashboard "Activated evil")
+  (jem-log "Activated evil")
 
   (if (and (fboundp 'server-running-p)
            (not (server-running-p)))
       (server-start))
-  (jem-add-log-to-dashboard "Started emacs server."))
+  (jem-log "Started emacs server."))
 
 (defun jem--redefine-base-buffers ()
   "Redefines configuration for base buffers such as *Messages* and *scratch*."
