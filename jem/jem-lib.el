@@ -32,7 +32,7 @@
 
   (require 'evil)
   (evil-mode 1)
-  (jem-log "Activated evil")
+  (jem-log "Activated evil.")
 
   (if (and (fboundp 'server-running-p)
            (not (server-running-p)))
