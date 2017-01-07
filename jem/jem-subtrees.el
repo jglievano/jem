@@ -19,7 +19,7 @@
                               "git subtree add --prefix %s %s master --squash"
                               path subtree))
                     (shell-command
-                     (format "git subtree add --prefix %s %s master --squash"
-                             path subtree)))))) jem-subtrees-list))
+                     (format "git subtree add --prefix third-party/%s %s master --squash"
+                             package-name subtree)))))) jem-subtrees-list))
 
 (provide 'jem-subtrees)
