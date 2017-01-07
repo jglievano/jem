@@ -2,6 +2,8 @@
 
 (require 'jem-definitions)
 
+(defvar jem-layer-names '("root"))
+
 (defun jem-elapsed-time ()
   "Returns the elapsed time between `current-time' and `jem-start-time'."
   (time-subtract (current-time) jem-start-time))
@@ -26,11 +28,17 @@
         (jem-log "Loading .custom.el")
         (load "~/.custom.el")))
 
-
   (require 'use-package)
-  (load (format "%slayers/+root/evil/boot.el" jem-directory))
-  (jem-root-evil|init)
-  (jem-log "Activated evil.")
+  ;; Loading packages from +root is mandatory.
+  (mapcar
+   (lambda (dir)
+     (if (and (not (string= dir "."))
+              (not (string= dir "..")))
+         (progn
+           (load (concat jem-layers-directory "+root/" dir "/boot.el"))
+           (funcall (intern (format "jem-root-%s|init" dir)))
+           (jem-log (format "Activated %s." dir)))))
+   (directory-files (concat jem-layers-directory "+root/")))
 
   (if (and (fboundp 'server-running-p)
            (not (server-running-p)))
