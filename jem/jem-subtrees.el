@@ -6,7 +6,7 @@
 (defun jem-install-subtrees ()
   "Install all subtrees in `jem-subrees-list'."
   (mapcar (lambda (subtree)
-            (let* ((package-name (subseq subtree (position #\/ subtree)))
+            (let* ((package-name (replace-regexp-in-string ".+/" "" subtree))
                    (url (format "git@github.com:%s.git" subtree))
                    (path (concat jem-third-party-directory package-name))
                    (default-directory user-emacs-directory))
