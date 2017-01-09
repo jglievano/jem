@@ -72,7 +72,7 @@ line as the `:title'. Default to nil.
          ,(format (concat "Association list containing a copy of some "
                           "properties of the transient state %S. Those "
                           "properties are used in macro "
-                          "`jem--transient-state-format-hint'.") name))
+                          "`jem-transient-state-format-hint'.") name))
        (add-to-list ',props-var '(hint ,hint))
        (add-to-list ',props-var '(columns ,columns))
        (add-to-list ',props-var '(foreign-keys ,foreign-keys))
@@ -100,11 +100,14 @@ line as the `:title'. Default to nil.
            (add-face-text-property 0 (length guide) 'italic t guide)
            (setq ,hint-var
                  (list 'concat
-                       (concat (propertize ,title
-                                           'face 'jem-transient-state-title-face)
-                               (if ,hint-doc-p " " "\n")) ,hint-var
-                               ',dyn-hint
-                               (concat "\n" guide)))))
+                       (concat
+                        (propertize ,title
+                                    'face
+                                    'jem-transient-state-title-face)
+                        (if ,hint-doc-p " " "\n"))
+;                       ,hint-var
+                       ',dyn-hint
+                       (concat "\n" guide)))))
        ,@bindkeys)))
 
 (defun jem-elapsed-time ()
