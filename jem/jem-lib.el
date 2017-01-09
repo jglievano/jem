@@ -3,6 +3,8 @@
 (require 'jem-definitions)
 
 (defvar jem-layer-names '("root"))
+(defface jem-transient-state-title-face `((t :inherit mode-line))
+  "Face for title of transient states.")
 
 (defun jem-activate-layer (layer-name)
   "Activates layer with LAYER-NAME."
@@ -41,17 +43,9 @@ line as the `:title'. Default to nil.
 `:dynamic-hint'
   A sexp evaluating to a string for dynamic hinting. Default to nil.
 `:foreign-keys'
-  What to do when keys not bound to transient state are entered. By default
-(nil) it exits the transient state. `warn' does not exit and warns the user.
-`run' tries to run the keybinding without exiting.
+  What to do when keys not bound in the transient state are entered.
 `:bindings'
-  One or serveral expressions with the form
-(STRING1 SYMBOL1 DOCSTRING :exit SYMBOL)
-where:
-- STRING1 is a key bounded ot the function or keymap SYMBOL1.
-- DOCSTRING is a string or a sexp that evaluates to a string.
-- :exit SYMBOL or sexp, ir non-nil then pressing it will leave the transient
-state. (default is nil)."
+  (STRING1 SYMBOL1 DOCSTRING :exit SYMBOL)."
   (declare (indent 1))
   (let* ((func (jem--transient-state-func-name name))
          (props-var (jem--transient-state-props-var-name name))
@@ -72,50 +66,46 @@ state. (default is nil)."
          (dyn-hint (plist-get props :dynamic-hint))
          (additional-docs (jem-mplist-get props :additional-docs))
          (foreign-keys (plist-get props :foreign-keys))
-         (bindkeys (jem--create-key-binding-form props body-func)))
-`(progn
-(defvar ,props-var nil
-  ,(format (concat "Association list containing a copy of some "
-                   "properties of the transient state %S. Those "
-                   "properties are used in macro "
-                   "`jem-transient-state-format-hint'.") name))
-(add-to-list ',props-var '(hint ,hint))
-(add-to-list ',props-var '(columns ,columns))
-(add-to-list ',props-var '(foreign-keys ,foreign-keys))
-(add-to-list ',props-var '(entry-sexp ,entry-sexp))
-(add-to-list ',props-var '(exit-sexp ,exit-sexp))
-(jem-defer-until-after-user-config
- '(lambda ()
-    (eval
-     (append
-      '(defhydra ,func
-         (nil nil
-              :hint ,hint
-              :columns ,columns
-              :foreign-keys ,foreign-keys
-              :body-pre ,entry-sexp
-              :before-exit ,exit-sexp)
-         ,doc)
-      (jem--transient-state-adjust-bindings
-       ',bindings ',remove-bindings ',add-bindings)))
-    (when ,title
-      (let ((guide (concat "[" (propertize "KEY" 'face 'hydra-face-blue)
-                           "] exits state  ["
-                           (if ',foreign-keys
-                               (propertize "KEY" 'face 'hydra-face-pink)
-                             (propertize "KEY" 'face 'hydra-face-red))
-                           "] will not exit")))
-        (add-face-text-property 0 (length guide) 'italic t guide)
-        (setq ,hint-var
-              (list 'concat
-                    (concat
-                     (propertize
-                      ,title
-                      'face 'jem-transient-state-title-face)
-                     (if ,hint-doc-p " " "\n")) ,hint-var
-                     ',dyn-hint
-                     (concat "\n" guide)))))
-    ,@bindkeys)))))
+         (bindkeys (jem--create-keybinding-form props body-func)))
+    `(progn
+       (defvar ,props-var nil
+         ,(format (concat "Association list containing a copy of some "
+                          "properties of the transient state %S. Those "
+                          "properties are used in macro "
+                          "`jem--transient-state-format-hint'.") name))
+       (add-to-list ',props-var '(hint ,hint))
+       (add-to-list ',props-var '(columns ,columns))
+       (add-to-list ',props-var '(foreign-keys ,foreign-keys))
+       (add-to-list ',props-var '(entry-sexp ,entry-sexp))
+       (add-to-list ',props-var '(exit-sexp ,exit-sexp))
+       (eval
+        (append
+         '(defhydra ,func
+            (nil nil
+                 :hint ,hint
+                 :columns ,columns
+                 :foreign-keys ,foreign-keys
+                 :body-pre ,entry-sexp
+                 :before-exit ,exit-sexp)
+            ,doc)
+         (jem--transient-state-adjust-bindings
+          ',bindings ',remove-bindings ',add-bindings)))
+       (when ,title
+         (let ((guide (concat "[" (propertize "KEY" 'face 'hydra-face-blue)
+                              "] exits state  ["
+                              (if ',foreign-keys
+                                  (propertize "KEY" 'face 'hydra-face-pink)
+                                (propertize "KEY" 'face 'hydra-face-red))
+                              "] will not exit")))
+           (add-face-text-property 0 (length guide) 'italic t guide)
+           (setq ,hint-var
+                 (list 'concat
+                       (concat (propertize ,title
+                                           'face 'jem-transient-state-title-face)
+                               (if ,hint-doc-p " " "\n")) ,hint-var
+                               ',dyn-hint
+                               (concat "\n" guide)))))
+       ,@bindkeys)))
 
 (defun jem-elapsed-time ()
   "Returns the elapsed time between `current-time' and `jem-start-time'."
@@ -191,6 +181,7 @@ Currently this function infloops when the list is circular."
 but should."
   (run-hooks 'text-mode-hook))
 
+
 (defun jem--redefine-base-buffers ()
   "Redefines configuration for base buffers such as *Messages* and *scratch*."
   ;; Specify how many lines to keep in *Messages*.
@@ -223,5 +214,61 @@ The default space configuration for jem is 2 spaces."
   (setq-default indent-tabs-mode nil)
   (setq tab-width 2)
   (setq-default tab-always-indent 'complete))
+
+(defun jem--transient-state-adjust-bindings (bindings to-remove to-add)
+  (append
+   (cl-remove-if
+    (lambda (bnd)
+      (and (boundp to-remove)
+           (listp (symbol-value to-remove))
+           (member (car bnd) (symbol-value to-remove))))
+    bindings)
+   (when (and (boundp to-add)
+              (listp (symbol-value to-add)))
+     (symbol-value to-add))))
+
+(defun jem--transient-state-body-func-name (name)
+  "Return the name of the transient state function."
+  (intern (format "jem-%S-transient-state-body" name)))
+
+(defmacro jem--transient-state-format-hint (name var hint)
+  "Format HINT and store the result in VAR for transient state NAME."
+  (declare (indent 1))
+  (let* ((props-var ,(jem--transient-state-props-var-name name))
+         (prop-hint (cadr (assq 'hint props-var)))
+         (prop-columns (cadr (assq 'columns props-var)))
+         (prop-foreign-keys (cadr (assq 'foreign-keys props-var)))
+         (prop-entry-sexp (cadr (assq 'entry-sexp props-var)))
+         (prop-exit-sexp (cadr (assq 'entry-sexp props-var))))
+    (setq ,var (jem--transient-state-make-doc
+                ',name
+                ,hint
+                `(nil
+                  nil
+                  :hint ,prop-hint
+                  :columns ,prop-columns
+                  :foreign-keys ,prop-foreign-keys
+                  :body-pre ,prop-entry-sexp
+                  :before-exit ,prop-exit-sexp)))
+    'append))
+
+(defun jem--transient-state-func-name (name)
+  "Return a full transient state function name given a NAME."
+  (intern (format "jem-%s-transient-state" name)))
+
+(defun jem--transient-state-heads-name (name)
+  "Return the name of the transient state heads variable."
+  (intern (format "jem-%S-transient-state-heads" name)))
+
+(defun jem--transient-state-make-doc (transient-state docstring &optional body)
+  "Use `hydra' internal function to format and apply DOCSTRING."
+  (let ((heads (jem--transient-state-heads-name transient-state)))
+    (setq body (if body body '(nil nil :hint nil :foreign-keys nil)))
+    (eval
+     (hydra--format nil body docstring (symbol-value heads)))))
+
+(defun jem--transient-state-props-var-name (name)
+  "Return the name of the variable used to store the transient state properties."
+  (intern (format "jem--%S-transient-state-props" name)))
 
 (provide 'jem-lib)

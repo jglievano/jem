@@ -63,3 +63,66 @@
   "en" 'jem-next-error
   "eN" 'jem-previous-error
   "ep" 'jem-previous-error)
+
+(jem-define-transient-state error
+  :title "Error transient state"
+  :hint-is-doc t
+  :dynamic-hint
+  (let ((sys (jem-error-delegate)))
+    (cond
+     ((eq 'flycheck sys)
+      "\nBrowsing flycheck errors from this buffer.")
+     ((eq 'emacs sys)
+      (let ((buf (next-error-find-buffer)))
+        (if buf
+            (concat "\nBrowsing entries from \""
+                    (buffer-name buf)
+                    "\""
+                    (with-current-buffer buf
+                      (when jem--gne-line-func
+                        (format " (%d of %d)"
+                                (max 1 (1+ (- jem--gne-cur-line
+                                              jem--gne-min-line)))
+                                (1+ (- jem--gne-max-line
+                                       jem--gne-min-line))))))
+          "\nNo next-error capable buffer found.")))))
+  :bindings
+  ("n" jem-next-error "next")
+  ("p" jem-previous-error "prev")
+  ("q" nil "quit" :exit t)
+  :evil-leader "e.")
+
+;; file.
+(jem-set-leader-keys
+  "fc" 'jem-copy-file
+  "fD" 'jem-delete-current-buffer-file
+  "fei" 'jem-find-user-init-file
+  "fed" 'jem-find-dotfile
+  "feD" 'jem-ediff-dotfile-and-template
+  "fev" 'jem-display-and-copy-version
+  "fCd" 'jem-unix2dos
+  "fCu" 'jem-dos2unix
+  "fg" 'rgrep
+  "fl" 'find-file-literally
+  "fE" 'jem-sudo-edit
+  "fo" 'jem-open-file-or-directory-in-external-app
+  "fR" 'jem-rename-current-buffer-file
+  "fS" 'evil-write-all
+  "fs" 'save-buffer
+  "fvd" 'add-dir-local-variable
+  "fvf" 'add-file-local-variable
+  "fvp" 'add-file-local-variable-prop-line
+  "fy" 'jem-show-and-copy-buffer-filename)
+
+;; help.
+(jem-set-leader-keys
+  "hdb" 'describe-bindings
+  "hdc" 'describe-char
+  "hdf" 'describe-function
+  "hdk" 'describe-key
+  "hdl" 'jem-describe-last-keys
+  "hdp" 'describe-package
+  "hds" 'jem-describe-system-info
+  "hdt" 'describe-theme
+  "hdv" 'describe-variable
+  "hn" 'view-emacs-news)
