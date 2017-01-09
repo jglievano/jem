@@ -1,5 +1,6 @@
 ;; jem-lib.el
 
+(require 'cl-lib)
 (require 'jem-definitions)
 
 (defvar jem-layer-names '("root"))
