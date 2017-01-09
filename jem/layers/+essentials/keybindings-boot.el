@@ -381,7 +381,7 @@
   ("p" previous-buffer "previous")
   ("K" jem-kill-this-buffer "kill")
   ("q" nil "quit" :exit t))
-(jem-set-leader-keys "b." 'jem-buffer-transient-state-body)
+(jem-set-leader-keys "b." 'jem-buffer-transient-state/body)
 
 ;; window manipulation transient state.
 (defun jem-shrink-window-horizontally (delta)
@@ -400,12 +400,12 @@
   :title "Window manipulation transient state"
   :doc "
  Select^^^^              Move^^^^              Split^^                Resize^^                     Other^^
-  485  ──────^^^^───────────── ────^^^^───────────── ─────^^─────────────── ──────^^──────────────────── ─────^^──────────────────────────────
-  486  [_j_/_k_] down/up       [_J_/_K_] down/up     [_s_] vertical         [_[_] shrink horizontally    [_q_] quit
-  487  [_h_/_l_] left/right    [_H_/_L_] left/right  [_S_] vert & follow    [_]_] enlarge horizontally   [_u_] restore prev layout
-  488  [_0_-_9_] window N      [_r_]^^   rotate fwd  [_v_] horizontal       [_{_] shrink vertically      [_U_] restore next layout
-  489  [_w_]^^   other window  [_R_]^^   rotate bwd  [_V_] horiz & follow   [_}_] enlarge vertically     [_d_] close current
-  490  [_o_]^^   other frame   ^^^^                  ^^                     ^^                           [_D_] close other"
+ ──────^^^^───────────── ────^^^^───────────── ─────^^─────────────── ──────^^──────────────────── ─────^^──────────────────────────────
+ [_j_/_k_] down/up       [_J_/_K_] down/up     [_s_] vertical         [_[_] shrink horizontally    [_q_] quit
+ [_h_/_l_] left/right    [_H_/_L_] left/right  [_S_] vert & follow    [_]_] enlarge horizontally   [_u_] restore prev layout
+ [_0_-_9_] window N      [_r_]^^   rotate fwd  [_v_] horizontal       [_{_] shrink vertically      [_U_] restore next layout
+ [_w_]^^   other window  [_R_]^^   rotate bwd  [_V_] horiz & follow   [_}_] enlarge vertically     [_d_] close current
+ [_o_]^^   other frame   ^^^^                  ^^                     ^^                           [_D_] close other"
   :bindings
   ("q" nil :exit t)
   ("0" select-window-0)
@@ -453,4 +453,4 @@
   ("V" split-window-right-and-focus)
   ("w" other-window))
 (jem-set-leader-keys "w."
-  'jem-window-manipulation-transient-state-body)
+  'jem-window-manipulation-transient-state/body)
