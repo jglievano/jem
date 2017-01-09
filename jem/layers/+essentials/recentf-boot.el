@@ -1,6 +1,6 @@
 ;; recentf-boot.el
 
-(defun jem-base-recentf|init ()
+(defun jem-essentials-recentf|init ()
   (use-package recentf
     :ensure t
     :defer t

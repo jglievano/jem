@@ -1,6 +1,6 @@
 ;; pcre2el-boot.el
 
-(defun jem-base-pcre2el|init ()
+(defun jem-essentials-pcre2el|init ()
   (use-package pcre2el
     :ensure t
     :defer t

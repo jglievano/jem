@@ -1,6 +1,6 @@
 ;; projectile-boot.el
 
-(defun jem-base-projectile|init ()
+(defun jem-essentials-projectile|init ()
   (use-package projectile
     :ensure t
     :commands (projectile-ack

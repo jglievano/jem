@@ -1,6 +1,6 @@
 ;; dired-boot.el
 
-(defun jem-base-dired|init ()
+(defun jem-essentials-dired|init ()
   (jem-set-leader-keys
     "ad" 'dired
     "fj" 'dired-jump

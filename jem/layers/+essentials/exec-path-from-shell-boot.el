@@ -1,6 +1,6 @@
 ;; exec-path-from-shell/boot.el
 
-(defun jem-base-exec-path-from-shell|init ()
+(defun jem-essentials-exec-path-from-shell|init ()
   (use-package exec-path-from-shell
     :ensure t
     :init

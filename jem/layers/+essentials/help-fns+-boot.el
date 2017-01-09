@@ -1,6 +1,6 @@
 ;; init-help-fns+-boot.el
 
-(defun jem-base-help-fns+|init ()
+(defun jem-essentials-help-fns+|init ()
   (use-package help-fns+
     :ensure t
     :commands (describe-keymap)

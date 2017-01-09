@@ -1,6 +1,6 @@
 ;; saveplace-boot.el
 
-(defun jem-base-saveplace|init ()
+(defun jem-essentials-saveplace|init ()
   (use-package saveplace
     :ensure t
     :init

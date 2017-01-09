@@ -1,6 +1,6 @@
 ;; whitespace-boot.el
 
-(defun jem-base-whitespace|init ()
+(defun jem-essentials-whitespace|init ()
   (use-package whitespace
     :ensure t
     :defer t

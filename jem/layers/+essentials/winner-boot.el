@@ -1,6 +1,6 @@
 ;; winner-boot.el
 
-(defun jem-base-winner|init ()
+(defun jem-essentials-winner|init ()
   (use-package winner
     :ensure t
     :init

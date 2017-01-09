@@ -1,6 +1,6 @@
 ;; bookmark-boot.el
 
-(defun jem-base-bookmark|init ()
+(defun jem-essentials-bookmark|init ()
   (use-package bookmark
     :ensure t
     :defer t

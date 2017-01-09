@@ -1,6 +1,6 @@
 ;; linum-boot.el
 
-(defun jem-base-linum|init ()
+(defun jem-essentials-linum|init ()
   (add-hook 'prog-mode-hook 'linum-mode)
   (add-hook 'text-mode-hook 'linum-mode)
   (setq linum-format "%5d ")

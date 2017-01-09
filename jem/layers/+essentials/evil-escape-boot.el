@@ -1,6 +1,6 @@
 ;; evil-escape-boot.el
 
-(defun jem-base-evil-escape|init ()
+(defun jem-essentials-evil-escape|init ()
   (use-package evil-escape
     :ensure t
     :init

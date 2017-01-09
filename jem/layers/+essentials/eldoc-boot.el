@@ -1,6 +1,6 @@
 ;; eldoc/boot.el
 
-(defun jem-base-eldoc|init ()
+(defun jem-essentials-eldoc|init ()
   (use-package eldoc
     :ensure t
     :defer t

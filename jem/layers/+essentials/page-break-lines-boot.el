@@ -1,6 +1,6 @@
 ;; page-break-lines-boot.el
 
-(defun jem-base-page-break-lines|init ()
+(defun jem-essentials-page-break-lines|init ()
   (use-package page-break-lines
     :ensure t
     :config

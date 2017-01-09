@@ -1,6 +1,6 @@
 ;; savehist-boot.el
 
-(defun jem-base-savehist|init ()
+(defun jem-essentials-savehist|init ()
   (use-package savehist
     :ensure t
     :init

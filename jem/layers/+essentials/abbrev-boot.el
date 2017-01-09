@@ -1,4 +1,4 @@
 ;; abbrev-boot.el
 
-(defun jem-base-abbrev|init ()
+(defun jem-essentials-abbrev|init ()
   (jem-hide-lighter abbrev-mode))

@@ -25,7 +25,7 @@ If the universal prefix argument is used then kill the window too."
        (with-selected-window window
          (jem-kill-this-buffer arg))))))
 
-(defun jem-base-ace-window|init ()
+(defun jem-essentials-ace-window|init ()
   (use-package ace-window
     :ensure t
     :defer t

@@ -1,6 +1,6 @@
 ;; evil-visualstar-boot.el
 
-(defun jem-base-evil-visualstar|init ()
+(defun jem-essentials-evil-visualstar|init ()
   (use-package evil-visualstar
     :ensure t
     :commands (evil-visualstar/begin-search-forward

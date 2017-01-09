@@ -1,6 +1,6 @@
 ;; imenu-boot.el
 
-(defun jem-base-imenu|init ()
+(defun jem-essentials-imenu|init ()
   (use-package imenu
     :ensure t
     :defer t

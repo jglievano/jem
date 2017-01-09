@@ -1,6 +1,6 @@
 ;; ediff/boot.el
 
-(defun jem-base-ediff|init ()
+(defun jem-essentials-ediff|init ()
   (use-package ediff
     :ensure t
     :defer t
