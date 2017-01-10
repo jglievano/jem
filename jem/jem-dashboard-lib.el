@@ -1,13 +1,10 @@
-;; jem-buffer-lib.el
+;; jem-dashboard-lib.el
 
 (defconst jem-dashboard-buffer-name "*jem*"
   "Name of dashboard's buffer.")
 
-(defvar jem-log-size 10
-  "Maximum number of logs displayed at a given time.")
-
-(defvar jem--logs '()
-  "List with logs entries. A log entry is a list too. e.g. '(time log).")
+(defvar jem--dashboard-logs-displayed-size 10
+  "Number of logs displayed in dashboard.")
 
 (defvar jem--dashboard-logs-start-line 0
   "Start line where logs display.")
@@ -39,16 +36,6 @@
       (delete-region (point) (progn (end-of-line) (point)))
       (insert msg))))
 
-(defun jem-log (msg)
-  "Appends MSG to dashboard output."
-  (interactive "sMessage: ")
-  (let* ((log-size (length jem--logs))
-         (timestamp (format-time-string "%6N" (jem-elapsed-time))))
-    (setq jem--logs (cons `(,timestamp ,msg) jem--logs))
-    (if (> log-size jem-log-size)
-        (setq jem--logs (butlast jem--logs (- log-size jem-log-size)))))
-  (jem-refresh-dashboard))
-
 (defun jem-refresh-dashboard ()
   "Refreshes dashboard."
   (jem--print-dashboard-logs jem--logs))
@@ -76,15 +63,10 @@
                          (format "v%s @ emacs%s" jem-version emacs-version)))
 
     (jem--insert-banner-in-dashboard)
-    (jem-append-newline jem-dashboard-buffer-name
-                        (jem-create-centered-string "^^^"))
+    (jem-append-newline jem-dashboard-buffer-name "")
     (jem-update-dashboard-status "loaded")
     (setq jem--dashboard-logs-start-line
-          (1+ (count-lines (point-min) (point-max))))
-    ;; Create lines for log.
-    (jem-append-newline jem-dashboard-buffer-name
-                        (make-string jem-log-size ?\n))
-    (toggle-truncate-lines)))
+          (1+ (count-lines (point-min) (point-max))))))
 
 (defun jem--delete-line (point)
   "Deletes line where POINT is."
@@ -118,7 +100,7 @@
   (with-current-buffer (get-buffer-create jem-dashboard-buffer-name)
     (setq current-line 0)
     (while (and logs
-                (< current-line jem-log-size))
+                (< current-line jem--dashboard-logs-displayed-size))
       (setq log (car logs))
       (let* ((time (car log))
              (msg (car (cdr log))))
@@ -128,4 +110,4 @@
       (setq current-line (1+ current-line))
       (setq logs (cdr logs)))))
 
-(provide 'jem-buffer-lib)
+(provide 'jem-dashboard-lib)

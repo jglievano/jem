@@ -55,7 +55,8 @@
   (jem--setup-backup-system)
   (jem--use-space-indentation)
 
-  (require 'jem-buffer-lib)
+  (require 'jem-log-lib)
+  (require 'jem-dashboard-lib)
   (jem-show-dashboard)
 
   (if (file-exists-p (expand-file-name "~/.custom.el"))

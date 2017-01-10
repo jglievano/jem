@@ -217,7 +217,7 @@ recentf list."
                                                         "Create directory '%s'?"
                                                         dir)))
                    (make-directory dir t)))
-               (rename-file filename new-name i)
+               (rename-file filename new-name 1)
                (rename-buffer new-name)
                (set-visited-file-name new-name)
                (set-buffer-modified-p nil)
