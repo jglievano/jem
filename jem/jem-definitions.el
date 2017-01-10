@@ -23,4 +23,14 @@
   (expand-file-name (concat user-emacs-directory "third-party/"))
   "Path to jem third-party directory.")
 
+(defvar jem--ivy-file-actions
+  '(("f" find-file-other-frame "other frame")
+    ("w" find-file-other-window "other window")
+    ("v" jem-find-file-vsplit "in vertical split")
+    ("s" jem-find-file-split "in horizontal split")
+    ("l" find-file-literally "literally")
+    ("d" jem-delete-file "delete file")
+    ("r" jem-rename-file "rename file"))
+  "Default ivy actions for files.")
+
 (provide 'jem-definitions)

@@ -66,6 +66,7 @@
   (require 'use-package)
   (setq use-package-verbose init-file-debug
         use-package-inject-hooks t)
+  (require 'jem-use-package)
   (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                            ("gnu" . "https://elpa.gnu.org/packages/")
                            ("marmalade" . "https://marmalade-repo.org/packages")
@@ -78,6 +79,7 @@
   ;; Loading packages from +root is mandatory.
   (jem-activate-layer "root")
   (jem-activate-layer "essentials")
+  (jem-activate-layer "ivy")
 
   (if (and (fboundp 'server-running-p)
            (not (server-running-p)))

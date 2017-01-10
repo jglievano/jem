@@ -59,6 +59,20 @@ For convenience, this function will accept additional KEY DEF pairs. e.g:
 
 (put 'jem-set-leader-keys 'lisp-indent-function 'defun)
 
+(defun jem-set-leader-keys-for-major-mode (mode key def &rest bindings)
+  "Add KEY and DEF as key binding for the major-MODE."
+  (let* ((map (intern (format "jem-%s-map" mode))))
+    (when (jem--init-leader-mode-map mode map)
+      (while key
+        (define-key (symbol-value map) (kbd key) def)
+        (setq key (pop bindings) def (pop bindings))))))
+
+(put 'jem-set-leader-keys-for-major-mode 'lisp-indent-function 'defun)
+
+(defun jem--acceptable-leader-p (key)
+  "Return t if key is a string and non-empty."
+  (and (stringp key) (not (string= key ""))))
+
 (defun jem--create-keybinding-form (props func)
   "Returns a form to bind FUNC to a key according to PROPS.
 
@@ -95,5 +109,31 @@ sequence string to be set with `define-key'."
      (when def-key
        `((dolist (val ',def-key)
            (define-key (eval (car val)) (kbd (cdr val)) ',func)))))))
+
+(defun jem--init-leader-mode-map (mode map &optional minor)
+  "Check for MAP-prefix. If it does not exist, use `bind-map' to create it and
+bind it. If MODE is a minor-mode, the third argument should be non nil."
+  (let* ((prefix (intern (format "%s-prefix" map)))
+         (leader1 (when (jem--acceptable-leader-p ",")
+                    ","))
+         (leader2 (when (jem--acceptable-leader-p jem-leader-key)
+                    (concat jem-leader-key (unless minor " m"))))
+         (emacs-leader1 (when (jem--acceptable-leader-p "C-M-m")
+                          "C-M-m"))
+         (emacs-leader2 (when (jem--acceptable-leader-p jem-emacs-leader-key)
+                          (concat jem-emacs-leader-key
+                                  (unless minor " m"))))
+         (leaders (delq nil (list leader1 leader2)))
+         (emacs-leaders (delq nil (list emacs-leader1 emacs-leader2))))
+    (or (boundp prefix)
+        (progn
+          (eval
+           `(bind-map ,map
+              :prefix-cmd ,prefix
+              ,(if minor :minor-modes :major-modes) (,mode)
+              :keys ,emacs-leaders
+              :evil-keys ,leaders
+              :evil-states (normal motion visual evilified)))
+          (boundp prefix)))))
 
 (provide 'jem-keymap)
