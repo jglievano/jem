@@ -55,6 +55,7 @@
 (defun jem--create-dashboard ()
   "Creates *jem* buffer."
   (with-current-buffer (get-buffer-create jem-dashboard-buffer-name)
+    (erase-buffer)
     ;; First line is the "status line".
     (jem-append jem-dashboard-buffer-name "\n")
     ;; Second line is the "info line".
@@ -67,6 +68,14 @@
     (jem-update-dashboard-status "loaded")
     (setq jem--dashboard-logs-start-line
           (1+ (count-lines (point-min) (point-max))))))
+
+(defun jem--dashboard-resize-on-hook ()
+  (let ((space-win (get-buffer-window jem-dashboard-buffer-name))
+        (frame-win (frame-selected-window)))
+    (when (and space-win
+               (not (window-minibuffer-p frame-win)))
+      (with-selected-window space-win
+        (jem--create-dashboard)))))
 
 (defun jem--delete-line (point)
   "Deletes line where POINT is."
@@ -109,5 +118,11 @@
         (insert (format "  (%s): %s" time msg)))
       (setq current-line (1+ current-line))
       (setq logs (cdr logs)))))
+
+(add-hook 'window-setup-hook
+          (lambda ()
+            (add-hook 'window-configuration-change-hook
+                      'jem--dashboard-resize-on-hook)
+            (jem--dashboard-resize-on-hook)))
 
 (provide 'jem-dashboard-lib)

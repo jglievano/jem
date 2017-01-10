@@ -55,6 +55,7 @@
   (jem--setup-backup-system)
   (jem--use-space-indentation)
 
+  (require 'jem-utils-lib)
   (require 'jem-log-lib)
   (require 'jem-dashboard-lib)
   (jem-show-dashboard)
