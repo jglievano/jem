@@ -1,6 +1,426 @@
 ;; keybindings-boot.el
 
+(defvar jem-indent-sensitive-modes
+  '(coffee-mode
+    elm-mode
+    haml-mode
+    haskell-mode
+    slim-mode
+    makefile-mode
+    makefile-bsdmake-mode
+    makefile-gmake-mode
+    makefile-imake-mode
+    python-mode
+    yaml-mode)
+  "Modes for which auto-indenting is suppressed.")
+
+(defcustom jem-yank-indent-threshold 1000
+  "Threshold over which indentation does not automatically occur."
+  :type 'number
+  :group 'jem)
+
+(defcustom jem-large-files-modes-list
+  '(archive-mode tar-mode jka-compr git-commit-mode image-mode doc-view-mode
+                 doc-view-mode-maybe ebrowse-tree-mode pdf-view-mode)
+  "Major modes which `jem-check-large-file' will not be automatically applied
+to."
+  :group 'jem
+  :type '(list symbol))
+
 (defun jem-essentials-keybindings|init ())
+
+(defun jem--run-local-vars-mode-hook ()
+  "Run a hook for the major-mode after the local variables have been processed."
+  (run-hooks (intern (format "%S-local-vars-hook" major-mode))))
+
+(defun jem-split-and-new-line ()
+  "Split a quoted string or s-expression and insert a new line with auto-indent."
+  (interactive)
+  (sp-split-sexp 1)
+  (sp-newline))
+
+(defun jem-push-mark-and-goto-beginning-of-line ()
+  "Push a mark at current location and go to the beginning of the line."
+  (interactive)
+  (push-mark (point))
+  (evil-beginning-of-line))
+
+(defun jem-push-mark-and-goto-end-of-line ()
+  "Push a mark at current location and go to the end of the line."
+  (interactive)
+  (push-mark (point))
+  (evil-end-of-line))
+
+(defun jem-evil-insert-line-above (count)
+  "Insert COUNT lines above the current line without changing the state."
+  (interactive "p")
+  (dotimes (_ count) (save-excursion (evil-insert-newline-above))))
+
+(defun jem-evil-insert-line-below (count)
+  "Insert COUNT lines below the current line without changing the state."
+  (interactive "p")
+  (dotimes (_ count) (save-excursion (evil-insert-newline-below))))
+
+(defun jem-evil-goto-next-line-and-indent (&optional count)
+  (interactive "p")
+  (let ((counter (or count 1)))
+    (while (> count 0)
+      (join-line 1)
+      (newline-and-indent)
+      (setq counter (1- counter)))))
+
+(defun jem-indent-region-or-buffer ()
+  "Indent a region if selected, otherwise the whole buffer."
+  (interactive)
+  (unless (member major-mode jem-indent-sensitive-modes)
+    (save-excursion
+      (if (region-active-p)
+          (progn
+            (indent-region (region-beginning) (region-end))
+            (message "Indented selected region."))
+        (progn
+          (evil-indent (point-min) (point-max))
+          (message "Indented buffer.")))
+      (whitespace-cleanup))))
+
+(defun jem-toggle-maximize-buffer ()
+  "Maximize buffer."
+  (interactive)
+  (if (and (= 1 (length (window-list)))
+           (assoc ?_ register-alist))
+      (jump-to-register ?_)
+    (progn
+      (window-configuration-to-register ?_)
+      (delete-other-windows))))
+
+(defun jem-maximize-horizontally ()
+  "Delete all windows left or right of the current window."
+  (interactive)
+  (require 'windmove)
+  (save-excursion
+    (while (condition-case nil (windmove-left) (error nil))
+      (delete-window))
+    (while (condition-case nil (windmove-right) (error nil))
+      (delete-window))))
+
+(defun jem-toggle-centered-buffer-mode ()
+  "Toggle `jem-centered-buffer-mode'."
+  (interactive)
+  (when (require 'centered-buffer-mode nil t)
+    (call-interactively 'jem-centered-buffer-mode)))
+
+(defun jem-centered-buffer-mode-full-width ()
+  "Center buffer in the frame."
+  (interactive)
+  (when (require 'centered-buffer-mode nil t)
+    (jem-maximize-horizontally)
+    (call-interactively 'jem-centered-buffer-mode)))
+
+(defun jem-useful-buffer-p (buffer)
+  "Dtermines if a buffer is useful."
+  (let ((buf-name (buffer-name buffer)))
+    (or (with-current-buffer buffer
+          (derived-mode-p 'comint-mode))
+        (cl-loop for useful-regexp in jem-useful-buffers-regexp
+                 thereis (string-match-p useful-regexp buf-name))
+        (cl-loop for useless-regexp in jem-useless-buffers-regexp
+                 never (string-match-p useless-regexp buf-name)))))
+
+(defun jem-useless-buffer-p (buffer)
+  "Determines if a buffer is useless."
+  (not (jem-useful-buffer-p buffer)))
+
+(defun jem-rotate-windows (count)
+  "Rotate each window forwards. A negative prefix argument rotates each window
+backwards. Dedicated windows are left untouched."
+  (interactive "p")
+  (let* ((non-dedicated-windows (remove-if 'window-dedicated-p (window-list)))
+         (num-windows (length non-dedicated-windows))
+         (i 0)
+         (step (+ num-windows count)))
+    (cond ((not (> num-windows 1))
+           (message "You can't rotate a single window!"))
+          (t
+           (dotimes (counter (- num-windows 1))
+             (let* ((next-i (% (+ step i) num-windows))
+                    (w1 (elt non-dedicated-windows i))
+                    (w2 (elt non-dedicated-windows next-i))
+                    (b1 (window-buffer w1))
+                    (b2 (window-buffer w2))
+                    (s1 (window-start w1))
+                    (s2 (window-start w2)))
+               (set-window-buffer w1 b2)
+               (set-window-buffer w2 b1)
+               (set-window-start w1 s2)
+               (set-window-start w2 s1)
+               (setq i next-i)))))))
+
+(defun jem-rotate-windows-backward (count)
+  "Rotate each window backwards. Dedicated windows are left untouched."
+  (interactive "p")
+  (jem-rotate-windows (* -1 count)))
+
+(defun jem-rename-file (filename &optional new-filename)
+  "Rename FILENAME to NEW-FILENAME.
+
+When NEW-FILENAME is not specified, asks user for new. Also renames associated
+buffer (if exists), invalidates projectile cache when it's possible and update
+recentf list."
+  (interactive "f")
+  (when (and filename (file-exists-p filename))
+    (let* ((buffer (find-buffer-visiting filename))
+           (short-name (file-name-nondirectory filename))
+           (new-name (if new-filename new-filename
+                       (read-file-name
+                        (format "Rename %s to: " short-name)))))
+      (cond ((get-buffer new-name)
+             (error "A buffer named '%s' already exists." new-name))
+            (t
+             (let ((dir (file-name-directory new-name)))
+               (when (and (not (file-exists-p dir)) (yew-or-no-p
+                                                     (format
+                                                      "Create directory '%s'?"
+                                                      dir)))
+                 (make-directory dir t)))
+             (rename-file filename new-name 1)
+             (when buffer (kill-buffer buffer)
+                   (find-file new-name))
+             (when (fboundp 'recentf-add-file)
+               (recentf-add-file new-name)
+               (recentf-remove-if-non-kept filename))
+             (when (projectile-project-p)
+               (call-interactively #'projectile-invalidate-cache))
+             (message "File '%s' renamed to '%s'" short-name
+                     (file-name-nondirectory new-name)))))))
+
+(defun jem-rename-current-buffer-file ()
+  "Renames current buffer and file it is visiting."
+  (interactive)
+  (let* ((name (buffer-name))
+         (filename (buffer-file-name))
+         (dir (file-name-directory filename)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file." name)
+      (let ((new-name (read-file-name "New name: " dir)))
+        (cond ((get-buffer new-name)
+               (error "A buffer named '%s' already exists." new-name))
+              (t
+               (let ((dir (file-name-directory new-name)))
+                 (when (and (not (file-exists-p dir)) (yes-or-no-p
+                                                       (format
+                                                        "Create directory '%s'?"
+                                                        dir)))
+                   (make-directory dir t)))
+               (rename-file filename new-name i)
+               (rename-buffer new-name)
+               (set-visited-file-name new-name)
+               (set-buffer-modified-p nil)
+               (when (fboundp 'recentf-add-file)
+                 (recentf-add-file new-name)
+                 (recentf-remove-if-non-kept filename))
+               (when (projectile-project-p)
+                 (call-interactively #'projectile-invalidate-cache))
+               (message "File '%s' renamed to '%s'" name
+                        (file-name-nondirectory new-name))))))))
+
+(defun jem-delete-file (filename &optional ask-user)
+  "Remove specified file or directory.
+
+Also kills associated buffer and invalidates projectile cache when possible.
+
+When ASK-USER is non-nil then the user will be asked to confirm."
+  (interactive "f")
+  (when (and filename (file-exists-p filename))
+    (let ((buffer (find-buffer-visiting filename)))
+      (when buffer
+        (kill-buffer buffer)))
+    (when (or (not ask-user)
+              (yes-or-no-p "Are you sure you want to DELETE? "))
+      (delete-file filename)
+      (when (projectile-project-p)
+        (call-interactively #'projectile-invalidate-cache)))))
+
+(defun jem-delete-current-buffer-file ()
+  "Removes file connected to current buffer and kills buffer."
+  (interactive)
+  (let ((filename (buffer-file-name))
+        (buffer (current-buffer))
+        (name (buffer-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (ido-kill-buffer)
+      (when (yes-or-no-p "Are you sure you want to DELETE? ")
+        (delete-file filename t)
+        (kill-buffer buffer)
+        (when (projectile-project-p)
+          (call-interactively #'projectile-invalidate-cache))
+        (message "File '%s' removed." filename)))))
+
+(defun jem-sudo-edit (&optional arg)
+  (interactive "p")
+  (let ((fname (if (or arg (not buffer-file-name))
+                   (read-file-name "File: ")
+                 buffer-file-name)))
+    (find-file
+     (cond ((string-match-p "^/ssh:" fname)
+            (with-temp-buffer
+              (insert fname)
+              (search-backward ":")
+              (let ((last-match-end nil)
+                    (last-ssh-hostname nil))
+                (while (string-match "@\\\([^:|]+\\\)" fname last-match-end)
+                  (setq last-ssh-hostname (or (match-string 1 fname)
+                                              last-ssh-hostname))
+                  (setq last-match-end (match-end 0)))
+                (insert (format "|sudo:%s" (or last-ssh-hostname "localhost"))))
+              (buffer-string)))
+           (t (concat "/sudo:root@localhost:" fname))))))
+
+(defun jem-check-large-file ()
+  (let* ((filename (buffer-file-name))
+         (size (nth 7 (file-attributes filename))))
+    (when (and
+           (not (memq major-mode jem-large-file-modes-list))
+           size (> size (* 1024 1024 jem-large-file-size))
+           (y-or-n-p (format (concat "%s is a large file, open literally to "
+                                     "avoid performance issues?")
+                             filename)))
+      (setq buffer-read-only t)
+      (buffer-disable-undo)
+      (fundamental-mode))))
+
+(defun jem-delete-window (&optional arg)
+  "Delete the current window.
+
+If the universal prefix argument is used then kill the buffer too."
+  (interactive "P")
+  (if (equal '(4) arg)
+      (kill-buffer-and-window)
+    (delete-window)))
+
+(defun jem-ace-delete-window (&optional arg)
+  "Ace delete window.
+
+If the universal prefix argument is used then kill the buffer too."
+  (interactive "P")
+  (require 'ace-window)
+  (aw-select
+   " Ace - Delete Window"
+   (lambda (window)
+     (when (equal '(4) arg)
+       (with-selected-window window
+         (jem-kill-this-buffer arg)))
+     (aw-delete-window window))))
+
+(defun jem-kill-this-buffer (&optional arg)
+  "Kill the current buffer.
+
+If the universal prefix argument is used then kill also the window."
+  (interactive "P")
+  (if (window-minibuffer-p)
+      (abort-recursive-edit)
+    (if (equal '(4) arg)
+        (kill-buffer-and-window)
+      (kill-buffer))))
+
+(defun jem-ace-kill-this-buffer (&optional arg)
+  "Ace kill visibile buffer in a window.
+
+If the universal prefix argument is used then kill also the window."
+  (interactive "P")
+  (require 'ace-window)
+  (let (golden-ratio-mode)
+    (aw-select
+     " Ace - Kill buffer in Window"
+     (lambda (window)
+       (with-selected-window window
+         (jem-kill-this-buffer arg))))))
+
+(defun jem-kill-other-buffers (&optional arg)
+  "Kill all other buffers.
+
+If the universal prefix argument is used then kill windows too."
+  (interactive "P")
+  (when (yes-or-no-p (format "Killing all buffers except '%s'? "
+                             (buffer-name)))
+    (mapc 'kill-buffer (delq (current-buffer) (buffer-list)))
+    (when (equal '(4) arg) (delete-other-windows))
+    (message "All other buffers deleted.")))
+
+(defun jem-toggle-current-window-dedication ()
+  "Toggle dedication state of a window."
+  (interactive)
+  (let* ((window (selected-window))
+         (dedicated (window-dedicated-p window)))
+    (set-window-dedicated-p window (not dedicated))
+    (message "Window %sdedicated to %s"
+             (if dedicated "no longer " "")
+             (buffer-name))))
+
+(defun jem-show-and-copy-buffer-filename ()
+  "Show and copy the full path to the current file in the minibuffer."
+  (interactive)
+  (let ((file-name (or (buffer-file-name) list-buffers-directory)))
+    (if file-name
+        (message (kill-new file-name))
+      (error "Buffer not visiting a file"))))
+
+(defun jem-find-user-init-file ()
+  "Edit the `user-init-file' in the current window."
+  (interactive)
+  (find-file-existing user-init-file))
+
+(defun jem-new-empty-buffer ()
+  "Create a new buffer called untitled(<n>)"
+  (interactive)
+  (let ((newbuf (generate-new-buffer-name "untitled")))
+    (switch-to-buffer newbuf)))
+
+(defun jem-split-window-vertically-and-switch ()
+  (interactive)
+  (split-window-vertically)
+  (other-window))
+
+(defun jem-split-window-horizontally-and-switch ()
+  (interactive)
+  (split-window-horizontally)
+  (other-window 1))
+
+(defun jem-layout-triple-columns ()
+  "Set the layout to triple columns."
+  (interactive)
+  (delete-other-windows)
+  (dotimes (i 2) (split-window-right))
+  (balance-windows))
+
+(defun jem-layout-double-columns ()
+  "Set the layout to double columns."
+  (interactive)
+  (delete-other-windows)
+  (split-window-right))
+
+(defun jem-insert-line-above-no-indent (count)
+  "Insert a new line above with no indentation."
+  (interactive "p")
+  (let ((p (+ (point) count)))
+    (save-excursion
+      (if (eq (line-number-at-pos) 1)
+          (evil-move-beginning-of-line)
+        (progn
+          (evil-previous-line)
+          (evil-move-end-of-line)))
+      (while (> count 0)
+        (insert "\n")
+        (setq count (1- count))))
+    (goto-char p)))
+
+(defun jem-insert-line-below-no-indent (count)
+  "Insert a new line below with no indentation."
+  (interactive "p")
+  (save-excursion
+    (evil-move-end-of-line)
+    (while (> count 0)
+      (insert "\n")
+      (setq count (1- count)))))
 
 (setq jem-keybinding-prefixes '(("a" "applications")
                                 ("b" "buffers")
