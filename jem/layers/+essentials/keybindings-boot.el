@@ -22,6 +22,9 @@ to."
   :group 'jem
   :type '(list symbol))
 
+(defvar jem-linum-mdown-line nil
+  "Define persistent variable for linum selection.")
+
 (defvar jem-really-kill-emacs nil
   "Prevent window manager close from closing instance.")
 
@@ -597,6 +600,175 @@ is non-nil then add whitespace to the left instead of the right."
     (message "%S" complete-regexp)
     (align-regexp start end complete-regexp group 1 t)))
 
+(defun jem-align-repeat-decimal (start end)
+  "Align a table of numbers on decimal points and dollar signs."
+  (interactive "r")
+  (require 'align)
+  (align-region start end nil
+                '((nil (regexp . "\\([\t ]*\\)\\$?\\([\t ]+[0-9]+\\)\\.?")
+                       (repeat . t)
+                       (group 1 2)
+                       (spacing 1 1)
+                       (justify nil t)))
+                nil))
+
+(defmacro jem-create-align-repeat-x
+    (name regexp &optional justify-right default-after)
+  (let ((new-func (intern (concat "jem-align-repeat-" name))))
+    `(defun ,new-func (start end switch)
+       (interactive "r\nP")
+       (let ((after (not (eq (if switch t nil) (if ,default-after t nil)))))
+         (jem-align-repeat start end ,regexp ,justify-right after)))))
+
+(jem-create-align-repeat-x "comma" "," nil t)
+(jem-create-align-repeat-x "semicolon" ";" nil t)
+(jem-create-align-repeat-x "colon" ":" nil t)
+(jem-create-align-repeat-x "equal" "=")
+(jem-create-align-repeat-x "math-oper" "[+\\-*/]")
+(jem-create-align-repeat-x "ampersand" "&")
+(jem-create-align-repeat-x "bar" "|")
+(jem-create-align-repeat-x "left-paren" "(")
+(jem-create-align-repeat-x "right-paren" ")" t)
+(jem-create-align-repeat-x "backslash" "\\\\")
+
+(defun jem-dos2unix ()
+  "Converts the current buffer to UNIX file format."
+  (interactive)
+  (set-buffer-file-coding-system 'undecided-unix nil))
+
+(defun jem-unix2dos ()
+  "Converts the current buffer to DOS file format."
+  (interactive)
+  (set-buffer-file-coding-system undecided-dos nil))
+
+(defun jem-copy-file ()
+  "Write the file under new name."
+  (interactive)
+  (call-interactively 'write-file))
+
+(defun jem-uniquify-lines ()
+  "Remove duplicate adjacent lines in region or current buffer."
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (let ((beg (if (region-active-p) (region-beginning) (point-min)))
+            (end (if (region-active-p) (region-end) (point-max))))
+        (goto-char beg)
+        (while (re-search-forward "^\\(.*\n\\)\\1+" end t)
+          (replace-match "\\1"))))))
+
+(defun jem-sort-lines ()
+  "Sort lines in region or current buffer."
+  (interactive)
+  (let ((beg (if (region-active-p) (region-beginning) (point-min)))
+        (end (if (region-active-p) (region-end) (point-max))))
+    (sort-lines nil beg end)))
+
+(defun jem--line-at-click ()
+  "Determine the visual line at click."
+  (save-excursion
+    (let ((click-y (cddr (mouse-position)))
+          (debug-on-error t)
+          (line-move-visual t))
+      (goto-char (window-start))
+      (next-line (1- click-y))
+      (1+ (line-number-at-pos)))))
+
+(defun jem-md-select-linum (event)
+  "Set point as jem-linum-mdown-line."
+  (interactive "e")
+  (mouse-select-window event)
+  (goto-line (jem--line-at-click))
+  (set-mark (point))
+  (setq jem-linum-mdown line (line-number-at-pos)))
+
+(defun jem-mu-select-linum ()
+  "Select code block between point and jem-linum-mdown-line."
+  (interactive)
+  (when jem-linum-mdown-line
+    (let (mu-line)
+      (setq mu-line (jem--line-at-click))
+      (goto-line (max jem-linum-mdown-line mu-line))
+      (set-mark (line-end-position))
+      (goto-line (min jem-linum-mdown-line mu-line))
+      (setq jem-linum-mdown-line nil))))
+
+(defun jem-select-current-block ()
+  "Select the current block of text between blank lines."
+  (interactive)
+  (let (p1 p2)
+    (progn
+      (if (re-search-backward "\n[ \t]*\n" nil "move")
+          (progn (re-search-forward "\n[ \t]*\n")
+                 (setq p1 (point)))
+        (setq p2 (point))))
+    (set-mark p1)))
+
+(defun jem-yank-advised-indent-function (beg end)
+  "Do indentation, as long as the region isn't too large."
+  (if (<= (- end beg) jem-yank-indent-threshold)
+      (indent-region beg end nil)))
+
+(jem-advise-commands
+ "indent" (yank yank-pop evil-paste-before evil-paste-after) around
+ "If current mode is not one of jem-indent-sensitive-modes indent yanked text."
+ (evil-start-undo-step)
+ ad-do-it
+ (if (and (not (equal '(4) (ad-get-arg 0)))
+          (not (member major-mode jem-indent-sensitive-modes))
+          (or (derived-mode-p 'prog-mode)
+              (member major-mode jem-indent-sensitive-modes)))
+     (let ((transient-mark-mode nil)
+           (save-undo buffer-undo-list))
+       (jem-yank-advised-indent-function (region-beginning)
+                                         (region-end)))))
+
+(defun jem--display-in-split (buffer alist)
+  "Split selected window and display BUFFER in the new window.
+
+BUFFER and ALIST have the same form as in `display-buffer'. If ALIST contains a
+split-side entry then its value must be usable as the SIDE argument for
+`split-window'."
+  (let ((window (split-window nil nil (cdr (assq 'split-side alist)))))
+    (window--display-buffer buffer window 'window alist) window))
+
+(defun jem-find-file-vsplit (file)
+  "Find file in vertical split."
+  (interactive "FFind file (vsplit): ")
+  (let ((buffer (find-file-noselect file)))
+    (pop-to-buffer buffer '(jem--display-in-split (split-side . right)))))
+
+(defun jem-find-file-split (file)
+  "Find file in horizontal split."
+  (interactive "FFind file (split): ")
+  (let ((buffer (find-file-noselect file)))
+    (pop-to-buffer buffer '(jem--display-in-split (split-side . below)))))
+
+(defun jem-switch-to-scratch-buffer ()
+  "Switch to *scratch* buffer."
+  (interactive)
+  (switch-to-buffer (get-buffer-create "*scratch*")))
+
+(defun jem-close-compilation-window ()
+  "Close the *compilation* buffer."
+  (interactive)
+  (when compilation-last-buffer
+    (delete-windows-on compilation-last-buffer)))
+
+(defun jem-no-linum (&rest ignore)
+  "Disable linum in current buffer."
+  (when (or 'linum-mode global-linum-mode)
+    (linum-mode 0)))
+
+(defun jem-linum-update-window-scale-fix (win)
+  "Fix linum for scaled text in the window WIN."
+  (set-window-margins win
+                      (ceiling (* (if (boundp 'text-scale-mode-step)
+                                      (expt text-scale-mode-step
+                                            text-scale-mode-amount) 1)
+                                  (if (car (window-margins))
+                                      (car (window-margins)) 1)))))
+
 (defun jem--persistent-server-running-p ()
   "Requires jem-really-kill-emacs to be toggled."
   (and (fboundp 'server-runnint-p)
@@ -960,7 +1132,6 @@ is non-nil then add whitespace to the left instead of the right."
   "xtw" 'transpose-words
   "xU" 'upcase-region
   "xu" 'downcase-region
-  "xwc" 'jem-count-words-analysis
   "x TAB" 'indent-rigidly)
 (define-key indent-rigidly-map "h" 'indent-rigidly-left)
 (define-key indent-rigidly-map "l" 'indent-rigidly-right)
