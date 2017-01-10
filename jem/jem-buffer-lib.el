@@ -83,7 +83,8 @@
           (1+ (count-lines (point-min) (point-max))))
     ;; Create lines for log.
     (jem-append-newline jem-dashboard-buffer-name
-                        (make-string jem-log-size ?\n))))
+                        (make-string jem-log-size ?\n))
+    (toggle-truncate-lines)))
 
 (defun jem--delete-line (point)
   "Deletes line where POINT is."

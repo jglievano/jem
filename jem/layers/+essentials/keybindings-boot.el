@@ -14,11 +14,6 @@
     yaml-mode)
   "Modes for which auto-indenting is suppressed.")
 
-(defcustom jem-yank-indent-threshold 1000
-  "Threshold over which indentation does not automatically occur."
-  :type 'number
-  :group 'jem)
-
 (defcustom jem-large-files-modes-list
   '(archive-mode tar-mode jka-compr git-commit-mode image-mode doc-view-mode
                  doc-view-mode-maybe ebrowse-tree-mode pdf-view-mode)
@@ -26,6 +21,14 @@
 to."
   :group 'jem
   :type '(list symbol))
+
+(defvar jem-really-kill-emacs nil
+  "Prevent window manager close from closing instance.")
+
+(defcustom jem-yank-indent-threshold 1000
+  "Threshold over which indentation does not automatically occur."
+  :type 'number
+  :group 'jem)
 
 (defun jem-essentials-keybindings|init ())
 
@@ -421,6 +424,183 @@ If the universal prefix argument is used then kill windows too."
     (while (> count 0)
       (insert "\n")
       (setq count (1- count)))))
+
+(defun jem-kill-matching-buffers-rudely (regexp &optional internal-too)
+  "Kill buffers whose name matches the specified REGEXP. This function unlike
+the build-in `kill-matching-buffers' does so without asking. The optional second
+argument indicates whether to kill internal buffers. too."
+  (interactive "sKill buffers matching this regular expression: \nP")
+  (dolist (buffer (buffer-list))
+    (let ((name (buffer-name buffer)))
+      (when (and name (not (string-equal name ""))
+                 (or internal-too (/= (aref name 0) ?\s))
+                 (string-match regexp name))
+        (kill-buffer buffer)))))
+
+(defadvice kill-emacs (around jem-really-exit activate)
+  "Only kill emacs if a prefix is set."
+  (if (and (not jem-really-kill-emacs)
+           (jem--persistent-server-running-p))
+      (jem-frame-killer)
+    ad-do-it))
+
+(defadvice save-buffers-kill-emacs (around jem-really-exit activate)
+  "Only kill emacs if a prefix is set."
+  (if jem-really-kill-emacs
+      ad-do-it
+    (jem-frame-killer)))
+
+(defun jem-save-buffers-kill-emacs ()
+  "Save all changed buffers and exit emacs."
+  (interactive)
+  (setq jem-really-kill-emacs t)
+  (save-buffers-kill-emacs))
+
+(defun jem-kill-emacs ()
+  "Lose all changes and exit emacs."
+  (interactive)
+  (setq jem-really-kill-emacs t)
+  (kill-emacs))
+
+(defun jem-prompt-kill-emacs ()
+  "Prompt to save changed buffers and exit emacs."
+  (interactive)
+  (setq jem-really-kill-emacs t)
+  (save-some-buffers)
+  (kill-emacs))
+
+(defun jem-frame-killer ()
+  "Kill server buffer and hide the main emacs window."
+  (interactive)
+  (condition-case-unless-debug nil
+      (delete-frame nil 1)
+    (error (make-frame-invisible nil 1))))
+
+(defun jem-toggle-frame-fullscreen ()
+  "Toggle fullscreen."
+  (interactive)
+  (toggle-frame-fullscreen))
+
+(defun jem-toggle-fullscreen ()
+  "Toggle full screen on X11 and Carbon."
+  (interactive)
+  (cond
+   ((eq window-system 'x)
+    (set-frame-parameter nil 'fullscreen
+                         (when (not (frame-parameter nil 'fullscreen))
+                           'fullboth)))
+   ((eq window-system 'mac)
+    (set-frame-parameter
+     nil 'fullscreen
+     (when (not (frame-parameter nil 'fullscreen)) 'fullscreen)))))
+
+(defun jem-toggle-frame-fullscreen-non-native ()
+  "Toggle full screen non-natively."
+  (interactive)
+  (modify-frame-parameters
+   nil
+   `((maximized
+      . ,(unless (memq (frame-parameter nil 'fullscreen) '(fullscreen fullboth))
+           (frame-parameter nil 'fullscreen)))
+     (fullscreen
+      . ,(if (memq (frame-parameter nil 'fullscreen) '(fullscreen fullboth))
+             (if (eq (frame-parameter nil 'maximized) 'maximized)
+                 'maximized)
+           'fullboth)))))
+
+(defmacro jem-advise-commands (advice-name commands class &rest body)
+  "Apply advice named ADVICE-NAME to multiple COMMANDS. The body of the advice
+is in BODY."
+  `(progn
+     ,@(mapcar (lambda (command)
+                 `(defadvice ,command
+                      (,class ,(intern (format "%S-%s" command advice-name))
+                              activate)
+                    ,@body))
+               commands)))
+
+(defun jem-save-revert-buffer ()
+  "Prompt before reverting the file."
+  (interactive)
+  (revert-buffer nil nil))
+
+(defun jem-safe-erase-buffer ()
+  "Prompt before erasing the content of the file."
+  (interactive)
+  (if (y-or-n-p (format "Erase content of buffer %s? " (current-buffer)))
+      (erase-buffer)))
+
+(defun jem--find-ert-test-buffer (ert-test)
+  "Return the buffer where ERT-TEST is defined."
+  (car (find-definition-noselect (ert-test-name ert-test) 'ert-deftest)))
+
+(defun jem-ert-run-tests-buffer ()
+  "Run all the tests in the current buffer."
+  (interactive)
+  (save-buffer)
+  (load-file (buffer-file-name))
+  (let ((cbuf (current-buffer)))
+    (ert '(satisfies (lambda (test)
+                       (eq cbuf (jem--find-ert-test-buffer test)))))))
+
+(defun jem--open-in-external-app (file-path)
+  "Open `file-path' in external application."
+  (cond
+   ((eq system-type 'windows-nt) (w32-shell-execute "open"
+                                                    (replace-regexp-in-string
+                                                     "/"
+                                                     "\\\\"
+                                                     file-path)))
+   ((eq system-type 'darwin) (shell-command (format "open \"%s\"" file-path)))
+   ((eq system-type 'gnu/linux) (let ((process-connection-type nil))
+                                  (start-process "" nil "xdg-open"
+                                                 file-path)))))
+
+(defun jem-open-file-or-directory-in-external-app (arg)
+  "Open current file in external application. If the universal prefix argument
+is used then open the folder containing the current file by the default
+explorer."
+  (interactive "P")
+  (if arg
+      (jem--open-in-external-app (expand-file-name default-directory))
+    (let ((file-path (if (derived-mode-p 'dired-mode)
+                         (dired-get-file-for-visit)
+                       buffer-file-name)))
+      (if file-path
+          (jem--open-in-external-app file-path)
+        (message "No file associated to this buffer.")))))
+
+(defun jem-copy-whole-buffer-to-clipboard ()
+  "Copy entire buffer to clipboard."
+  (interactive)
+  (clipboard-kill-ring-save (point-min) (point-max)))
+
+(defun jem-copy-clipboard-to-whole-buffer ()
+  "Copy clipboard and replace buffer."
+  (interactive)
+  (delete-region (point-min) (point-max))
+  (clipboard-yank)
+  (deactivate-mark))
+
+(defun jem-align-repeat (start end regexp &optional justify-right after)
+  "Repeat alignment with respect to the given regular expression. If
+JUSTIFY-RIGHT is non-nil then justify to the right instead of the left. If AFTER
+is non-nil then add whitespace to the left instead of the right."
+  (interactive "r\nsAlign regexp: ")
+  (let* ((ws-regexp (if (string-empty-p regexp)
+                        "\\(\\s-+\\)"
+                      "\\(\\s-*\\)"))
+         (complete-regexp (if after
+                              (concat regexp ws-regexp)
+                            (concat ws-regexp regexp)))
+         (group (if justify-right -1 1)))
+    (message "%S" complete-regexp)
+    (align-regexp start end complete-regexp group 1 t)))
+
+(defun jem--persistent-server-running-p ()
+  "Requires jem-really-kill-emacs to be toggled."
+  (and (fboundp 'server-runnint-p)
+       (server-running-p)))
 
 (setq jem-keybinding-prefixes '(("a" "applications")
                                 ("b" "buffers")
