@@ -45,7 +45,7 @@ It introduces 3 elements:
 ## Buffer
 - Goto line. SPC b g
 - New buffer. SPC b n
-- Open buffer. SPC b o
+- Open buffer. SPC b b
 - Search in buffer. SPC b s
 - iMenu in buffer. SPC b S
 - Paste from clipboard. SPC b C-v

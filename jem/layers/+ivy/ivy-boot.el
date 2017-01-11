@@ -14,11 +14,6 @@
     :config
     (with-eval-after-load 'recentf
       (setq ivy-use-virtual-buffers t))
-    (jem-set-leader-keys
-      "a'" 'jem-ivy-avilable-repls
-      "fr" 'counsel-recentf
-      "rl" 'ivy-resume
-      "bb" 'ivy-switch-buffer)
 
     (ivy-set-actions 'counsel-recentf jem--ivy-file-actions)
 

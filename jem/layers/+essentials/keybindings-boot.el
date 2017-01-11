@@ -40,6 +40,7 @@
   ;; buffers.
   (jem-set-leader-keys
     "b TAB" 'jem-alternate-buffers
+    "bb" 'ivy-switch-buffer
     "bd" 'jem-kill-this-buffer
     "bn" 'jem-new-empty-buffer
     "bCv" 'jem-copy-clipboard-to-whole-buffer
