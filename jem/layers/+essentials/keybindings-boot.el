@@ -1,31 +1,17 @@
 ;; keybindings-boot.el
 
 (defun jem-essentials-keybindings|init ()
-  (setq jem-keybinding-prefixes '(("a" "applications")
-                                  ("b" "buffers")
-                                  ("c" "compile/comments")
-                                  ("e" "errors")
+  (setq jem-keybinding-prefixes '(("b" "buffers")
+                                  ("d" "debug")
+                                  ("e" "emacs")
                                   ("f" "files")
-                                  ("fC" "files/convert")
-                                  ("fv" "variables")
                                   ("h" "help")
                                   ("hd" "help-describe")
-                                  ("i" "insertion")
-                                  ("j" "jump/join/split")
-                                  ("n" "narrow/numbers")
-                                  ("p" "projects")
-                                  ("p$" "projects/shell")
-                                  ("q" "quit")
-                                  ("t" "toggles")
-                                  ("T" "UI toggles")
+                                  ("t" "text")
                                   ("w" "windows")
-                                  ("x" "text")
-                                  ("xa" "align")
-                                  ("xd" "delete")
-                                  ("xl" "lines")
-                                  ("xm" "move")
-                                  ("xt" "transpose")
-                                  ("xw" "words")))
+                                  ("p" "projects")
+                                  ("w" "windows")
+                                  ("!" "shell")))
 
   (mapc (lambda (x) (apply #'jem-declare-prefix x))
         jem-keybinding-prefixes)
@@ -48,93 +34,30 @@
   (define-key minibuffer-local-must-match-map (kbd "<escape>") 'keyboard-escape-quit)
   (define-key minibuffer-local-isearch-map (kbd "<escape>") 'keyboard-escape-quit)
 
-  ;; universal argument.
-  (jem-set-leader-keys "u" 'universal-argument)
-  (define-key universal-argument-map
-    (kbd (concat jem-leader-key " u")) 'universal-argument-more)
-
   ;; shell.
-  (jem-set-leader-keys "!" 'shell-command)
-
-  ;; applications.
-  (jem-set-leader-keys
-    "ac" 'calc-dispatch
-    "ap" 'list-processes
-    "aP" 'proced
-    "au" 'undo-tree-visualize)
+  (jem-set-leader-keys "!!" 'shell-command)
 
   ;; buffers.
   (jem-set-leader-keys
-    "TAB" 'jem-alternate-buffers
+    "b TAB" 'jem-alternate-buffers
     "bd" 'jem-kill-this-buffer
-    "be" 'jem-safe-erase-buffer
-    "bh" 'jem-home
-    "b C-d" 'jem-kill-matching-buffers-rudely
-    "bn" 'next-buffer
-    "bm" 'jem-kill-other-buffers
-    "bN" 'jem-new-empty-buffer
-    "bP" 'jem-copy-clipboard-to-whole-buffer
-    "bp" 'previous-buffer
-    "bR" 'jem-safe-revert-buffer
-    "bs" 'jem-switch-to-scratch-buffer
-    "bY" 'jem-copy-whole-buffer-to-clipboard
-    "bw" 'read-only-mode)
+    "bn" 'jem-new-empty-buffer
+    "bCv" 'jem-copy-clipboard-to-whole-buffer
+    "bCc" 'jem-copy-whole-buffer-to-clipboard
+    "br" 'read-only-mode)
 
-  ;; errors.
+  ;; emacs.
   (jem-set-leader-keys
-    "en" 'jem-next-error
-    "eN" 'jem-previous-error
-    "ep" 'jem-previous-error)
-
-  (jem-define-transient-state error
-    :title "Error transient state"
-    :hint-is-doc t
-    :dynamic-hint
-    (let ((sys (jem-error-delegate)))
-      (cond
-       ((eq 'flycheck sys)
-        "\nBrowsing flycheck errors from this buffer.")
-       ((eq 'emacs sys)
-        (let ((buf (next-error-find-buffer)))
-          (if buf
-              (concat "\nBrowsing entries from \""
-                      (buffer-name buf)
-                      "\""
-                      (with-current-buffer buf
-                        (when jem--gne-line-func
-                          (format " (%d of %d)"
-                                  (max 1 (1+ (- jem--gne-cur-line
-                                                jem--gne-min-line)))
-                                  (1+ (- jem--gne-max-line
-                                         jem--gne-min-line))))))
-            "\nNo next-error capable buffer found.")))))
-    :bindings
-    ("n" jem-next-error "next")
-    ("p" jem-previous-error "prev")
-    ("q" nil "quit" :exit t)
-    :evil-leader "e.")
+    "ek" 'jem-switch-to-scratch-buffer
+    "eq" 'prompt-kill-emacs)
 
   ;; file.
   (jem-set-leader-keys
     "fc" 'jem-copy-file
-    "fD" 'jem-delete-current-buffer-file
-    "fei" 'jem-find-user-init-file
-    "fed" 'jem-find-dotfile
-    "feD" 'jem-ediff-dotfile-and-template
-    "fev" 'jem-display-and-copy-version
-    "fCd" 'jem-unix2dos
-    "fCu" 'jem-dos2unix
-    "fg" 'rgrep
-    "fl" 'find-file-literally
-    "fE" 'jem-sudo-edit
-    "fo" 'jem-open-file-or-directory-in-external-app
-    "fR" 'jem-rename-current-buffer-file
-    "fS" 'evil-write-all
-    "fs" 'save-buffer
-    "fvd" 'add-dir-local-variable
-    "fvf" 'add-file-local-variable
-    "fvp" 'add-file-local-variable-prop-line
-    "fy" 'jem-show-and-copy-buffer-filename)
+    "fd" 'jem-delete-current-buffer-file
+    "fF" 'jem-open-file-or-directory-in-external-app
+    "fr" 'jem-rename-current-buffer-file
+    "fs" 'save-buffer)
 
   ;; help.
   (jem-set-leader-keys
@@ -149,19 +72,9 @@
     "hdv" 'describe-variable
     "hn" 'view-emacs-news)
 
-  ;; insert.
+  ;; text.
   (jem-set-leader-keys
-    "iJ" 'jem-insert-line-below-no-indent
-    "iK" 'jem-insert-line-above-no-indent
-    "ik" 'jem-evil-insert-line-above
-    "ij" 'jem-evil-insert-line-below)
-
-  ;; format
-  (jem-set-leader-keys
-    "jo" 'open-line
-    "j=" 'jem-indent-region-or-buffer
-    "jS" 'jem-split-and-new-line
-    "jk" 'jem-evil-goto-next-line-and-indent)
+    "ti" 'jem-indent-region-or-buffer)
 
   ;; navigation.
   (jem-set-leader-keys
@@ -170,104 +83,16 @@
     "jf" 'find-function
     "jv" 'find-variable)
 
-  ;; compilation.
+  ;; debug..
   (jem-set-leader-keys
-    "cC" 'compile
-    "ck" 'kill-compilation
-    "cr" 'recompile
-    "cd" 'jem-close-compilation-window)
+    "dC" 'compile
+    "dk" 'kill-compilation
+    "dr" 'recompile
+    "dd" 'jem-close-compilation-window)
 
   (with-eval-after-load 'compile
     (define-key compilation-mode-map "r" 'recompile)
     (define-key compilation-mode-map "g" nil))
-
-  ;; narrow and widen.
-  (jem-set-leader-keys
-    "nr" 'narrow-to-region
-    "np" 'narrow-to-page
-    "nf" 'narrow-to-defun
-    "nw" 'widen)
-
-  ;; toggle.
-  (jem-add-toggle highlight-current-line-globally
-    :mode global-hl-line-mode
-    :documentation "Globally highlight the current line."
-    :evil-leader "thh")
-  (jem-add-toggle truncate-lines
-    :status truncate-lines
-    :on (toggle-truncate-lines)
-    :off (toggle-truncate-lines -1)
-    :documentation "Truncate long lines (no wrap)."
-    :evil-leader "tl")
-  (jem-add-toggle visual-line-navigation
-    :status visual-line-mode
-    :on
-    (progn
-      (visual-line-mode)
-      (evil-define-minor-mode-key 'motion 'visual-line-mode "j"
-        'evil-next-visual-line)
-      (evil-define-minor-mode-key 'motion 'visual-line-mode "k"
-        'evil-previous-visual-line)
-      (when (bound-and-true-p evil-escape-mode)
-        (evil-escape-mode -1)
-        (setq evil-escape-motion-state-shadowed-func nil)
-        (evil-define-minor-mode-key 'motion 'visual-line-mode "j"
-          'evil-next-visual-line)
-        (evil-define-minor-mode-key 'motion 'visual-line-mode "k"
-          'evil-previous-visual-line)
-        (evil-escape-mode))
-      (evil-normalize-keymaps))
-    :off
-    (progn
-      (visual-line-mode -1)
-      (evil-normalize-keymaps))
-    :documentation "Move point according to visual lines."
-    :evil-leader "tL")
-  (jem-add-toggle auto-fill-mode
-    :status auto-fill-function
-    :on (auto-fill-mode)
-    :off (auto-fill-mode -1)
-    :documentation "Break line beyong `current-fill-column' while editing."
-    :evil-leader "tF")
-  (jem-add-toggle debug-on-error
-    :status debug-on-error
-    :on (setq debug-on-error t)
-    :off (setq debug-on-error nil)
-    :documentation "Toggle display of backtrace when an error happens."
-    :evil-leader "Tf")
-  (jem-add-toggle fringe
-    :status (not (equal fringe-mode 0))
-    :on (call-interactively 'fringe-mode)
-    :off (fringe-mode 0)
-    :documentation "Display the fringe in GUI mode."
-    :evil-leader "Tf")
-  (jem-add-toggle fullscreen-frame
-    :status (memq (frame-parameter nil 'fullscreen) '(fullscreen fullboth))
-    :on (jem-toggle-frame-fullscreen)
-    :off (jem-toggle-frame-fullscreen)
-    :documentation "Display the current frame in full screen."
-    :evil-leader "TF")
-  (jem-add-toggle maximize-frame
-    :status (eq (frame-parameter nil 'fullscreen) 'maximized)
-    :on (toggle-frame-maximized)
-    :off (toggle-frame-maximized)
-    :documentation "Maximize the current frame."
-    :evil-leader "TM")
-  (jem-add-toggle semantic-stickyfunc
-    :mode semantic-stickyfunc-mode
-    :documentation "Enable semantic-stickyfunc."
-    :evil-leader "TS")
-  (jem-add-toggle semantic-stickyfunc-globally
-    :mode global-semantic-stickyfunc-mode
-    :documentation "Enable semantic-stickyfunc globally."
-    :evil-leader "T C-S")
-
-  ;; quit.
-  (jem-set-leader-keys
-    "qs" 'jem-save-buffers-kill-emacs
-    "qq" 'jem-prompt-kill-emacs
-    "qQ" 'jem-kill-emacs
-    "qz" 'jem-frame-killer)
 
   ;; window.
   (defun split-window-below-and-focus ()
@@ -287,83 +112,48 @@
                (symbol-value golden-ratio-mode))
       (golden-ratio)))
   (jem-set-leader-keys
-    "w2" 'jem-layout-double-columns
-    "w3" 'jem-layout-triple-columns
     "wb" 'jem-switch-to-minibuffer-window
     "wd" 'jem-delete-window
-    "wt" 'jem-toggle-current-window-dedication
     "wf" 'follow-mode
-    "wF" 'make-frame
-    "wH" 'evil-window-move-far-left
-    "w <S-left>" 'evil-window-move-far-left
     "wh" 'evil-window-left
     "w <left>" 'evil-window-left
-    "wJ" 'evil-window-move-very-bottom
-    "w <S-down>" 'evil-window-move-very-bottom
     "wj" 'evil-window-down
     "w <down>" 'evil-window-down
-    "wK" 'evil-window-move-very-top
-    "w <S-up>" 'evil-window-move-very-top
     "wk" 'evil-window-up
     "w <up>" 'evil-window-up
-    "wL" 'evil-window-move-far-right
-    "w <S-right>" 'evil-window-move-far-right
     "wl" 'evil-window-right
     "w <right>" 'evil-window-right
-    "wm" 'jem-toggle-maximize-buffer
-    "wc" 'jem-toggle-centered-buffer-mode
-    "wC" 'jem-centered-buffer-mode-full-width
     "wo" 'other-frame
-    "wr" 'jem-rotate-windows
-    "wR" 'jem-rotate-windows-backward
-    "ws" 'split-window-below
     "wS" 'split-window-below-and-focus
     "w-" 'split-window-below
-    "wU" 'winner-redo
-    "wu" 'winner-undo
-    "wv" 'split-window-right
     "wV" 'split-window-right-and-focus
-    "ww" 'other-window
-    "w/" 'split-window-right
-    "w=" 'balance-window
-    "w_" 'jem-maximize-horizontally)
+    "w/" 'split-window-right)
 
   ;; text.
   (defalias 'count-region 'count-words-region)
   (jem-set-leader-keys
-    "xa&" 'jem-align-repeat-ampersand
-    "xa(" 'jem-align-repeat-left-paren
-    "xa)" 'jem-align-repeat-right-paren
-    "xa," 'jem-align-repeat-comma
-    "xa." 'jem-align-repeat-decimal
-    "xa:" 'jem-align-repeat-colon
-    "xa;" 'jem-align-repeat-semicolon
-    "xa=" 'jem-align-repeat-equal
-    "xa\\" 'jem-align-repeat-backslash
-    "xaa" 'align
-    "xac" 'align-current
-    "xam" 'jem-align-repeat-math-oper
-    "xar" 'jem-align-repeat
-    "xa|" 'jem-align-repeat-bar
-    "xc" 'count-region
-    "xdw" 'delete-trailing-whitespace
-    "xjc" 'set-justification-center
-    "xjf" 'set-justification-full
-    "xjl" 'set-justification-left
-    "xjn" 'set-justification-none
-    "xjr" 'set-justification-right
-    "xls" 'jem-sort-lines
-    "xlu" 'jem-uniquify-lines
-    "xtc" 'transpose-chars
-    "xtl" 'transpose-lines
-    "xtw" 'transpose-words
-    "xU" 'upcase-region
-    "xu" 'downcase-region
-    "x TAB" 'indent-rigidly)
-  (define-key indent-rigidly-map "h" 'indent-rigidly-left)
-  (define-key indent-rigidly-map "l" 'indent-rigidly-right)
-  (define-key indent-rigidly-map "H" 'indent-rigidly-left-to-tab-stop)
-  (define-key indent-rigidly-map "L" 'indent-rigidly-right-to-tab-stop)
+    "ta&" 'jem-align-repeat-ampersand
+    "ta(" 'jem-align-repeat-left-paren
+    "ta)" 'jem-align-repeat-right-paren
+    "ta," 'jem-align-repeat-comma
+    "ta." 'jem-align-repeat-decimal
+    "ta:" 'jem-align-repeat-colon
+    "ta;" 'jem-align-repeat-semicolon
+    "ta=" 'jem-align-repeat-equal
+    "ta\\" 'jem-align-repeat-backslash
+    "taa" 'align
+    "tac" 'align-current
+    "tam" 'jem-align-repeat-math-oper
+    "tar" 'jem-align-repeat
+    "ta|" 'jem-align-repeat-bar
+    "tdw" 'delete-trailing-whitespace
+    "tjc" 'set-justification-center
+    "tjf" 'set-justification-full
+    "tjl" 'set-justification-left
+    "tjn" 'set-justification-none
+    "tjr" 'set-justification-right
+    "ts" 'jem-sort-lines
+    "tu" 'jem-uniquify-lines)
 
   ;; shell.
   (with-eval-after-load 'shell
@@ -377,7 +167,7 @@
     ("n" next-buffer "next")
     ("N" previous-buffer "previous")
     ("p" previous-buffer "previous")
-    ("K" jem-kill-this-buffer "kill")
+    ("K" kill-this-buffer "kill")
     ("q" nil "quit" :exit t))
   (jem-set-leader-keys "b." 'jem-buffer-transient-state/body)
 
@@ -401,8 +191,8 @@
  ──────^^^^───────────── ────^^^^───────────── ─────^^─────────────── ──────^^──────────────────── ─────^^──────────────────────────────
  [_j_/_k_] down/up       [_J_/_K_] down/up     [_s_] vertical         [_[_] shrink horizontally    [_q_] quit
  [_h_/_l_] left/right    [_H_/_L_] left/right  [_S_] vert & follow    [_]_] enlarge horizontally   [_u_] restore prev layout
- [_0_-_9_] window N      [_r_]^^   rotate fwd  [_v_] horizontal       [_{_] shrink vertically      [_U_] restore next layout
- [_w_]^^   other window  [_R_]^^   rotate bwd  [_V_] horiz & follow   [_}_] enlarge vertically     [_d_] close current
+ [_0_-_9_] window N                            [_v_] horizontal       [_{_] shrink vertically      [_U_] restore next layout
+ [_w_]^^   other window                        [_V_] horiz & follow   [_}_] enlarge vertically     [_d_] close current
  [_o_]^^   other frame   ^^^^                  ^^                     ^^                           [_D_] close other"
     :bindings
     ("q" nil :exit t)
@@ -441,8 +231,6 @@
     ("L" evil-window-move-far-right)
     ("<S-right>" evil-window-move-far-right)
     ("o" other-frame)
-    ("r" jem-rotate-windows)
-    ("R" jem-rotate-windows-backward)
     ("s" split-window-below)
     ("S" split-window-below-and-focus)
     ("u" winner-undo)
