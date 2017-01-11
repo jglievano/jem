@@ -49,7 +49,7 @@
   ;; emacs.
   (jem-set-leader-keys
     "ek" 'jem-switch-to-scratch-buffer
-    "eq" 'prompt-kill-emacs)
+    "eq" 'jem-prompt-kill-emacs)
 
   ;; file.
   (jem-set-leader-keys

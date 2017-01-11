@@ -204,6 +204,12 @@ explorer."
           (jem--open-in-external-app file-path)
         (message "No file associated to this buffer.")))))
 
+(defun jem-prompt-kill-emacs ()
+  "Prompt to save buffers and exit Emacs."
+  (interactive)
+  (save-some-buffers)
+  (kill-emacs))
+
 (defun jem-rename-current-buffer-file ()
   "Renames current buffer and file it is visiting."
   (interactive)
