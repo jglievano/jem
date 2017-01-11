@@ -722,10 +722,6 @@ split-side entry then its value must be usable as the SIDE argument for
   "Return the buffer where ERT-TEST is defined."
   (car (find-definition-noselect (ert-test-name ert-test) 'ert-deftest)))
 
-(defun jem--layout-not-contains-buffer-p (buffer)
-  "Return non-nil if current layout does not contain BUFFER."
-  (not (persp-contain-buffer-p buffer)))
-
 (defun jem--line-at-click ()
   "Determine the visual line at click."
   (save-excursion
