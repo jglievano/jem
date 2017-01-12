@@ -1,6 +1,6 @@
-;; +extensions/web.el
+;; +ext/web.el
 
-(defun jem-extensions-web|init ()
+(defun jem-ext-web|init ()
   (use-package web-mode
     :mode (("\\.html\\'" . web-mode)
            ("\\.htm\\'" . web-mode)

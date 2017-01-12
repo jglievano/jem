@@ -1,6 +1,6 @@
-;; +extensions/python.el
+;; +ext/python.el
 
-(defun jem-extensions-python|init ()
+(defun jem-ext-python|init ()
   (use-package python-mode
     :functions python-shell
     :mode (("\\.py\\'" . python-mode)

@@ -1,5 +1,5 @@
-;; go.el
+;; +ext/go.el
 
-(defun jem-extensions-go|init ()
+(defun jem-ext-go|init ()
   (use-package go-mode
     :mode "\\.go\\'"))

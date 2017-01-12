@@ -1,6 +1,6 @@
-;; haskell.el
+;; +ext/haskell.el
 
-(defun jem-extensions-haskell|init ()
+(defun jem-ext-haskell|init ()
   (use-package haskell-mode
     :mode (("\\.ghs\\'" . haskell-mode)
            ("\\.hsc\\'" . haskell-mode))))

@@ -1,6 +1,6 @@
-;; +extensions/ruby.el
+;; +ext/ruby.el
 
-(defun jem-extensions-ruby|init ()
+(defun jem-ext-ruby|init ()
   (use-package ruby-mode
     :interpreter "ruby"
     :mode (("\\.rb\\'" . ruby-mode)

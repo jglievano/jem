@@ -1,6 +1,6 @@
-;; +extensions/coffee.el
+;; +ext/coffee.el
 
-(defun jem-extensions-coffee|init ()
+(defun jem-ext-coffee|init ()
   (use-package coffee-mode
     :mode (("\\.coffee\\'" . coffee-mode)
            ("\\.iced\\" . coffee-mode))))

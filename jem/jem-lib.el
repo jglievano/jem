@@ -88,7 +88,7 @@
   (jem-activate-layer "root")
   (jem-activate-layer "essentials")
   (jem-activate-layer "ido")
-  (jem-activate-layer "extensions")
+  (jem-activate-layer "ext")
   (jem-activate-layer "git")
 
   (if (and (fboundp 'server-running-p)

@@ -1,6 +1,6 @@
-;; +extensions/markdown.el
+;; +ext/markdown.el
 
-(defun jem-extensions-markdown|init ()
+(defun jem-ext-markdown|init ()
   (use-package markdown-mode
     :mode (("\\.markdown\\'" . markdown-mode)
            ("\\.md\\'" . markdown-mode))))

@@ -1,6 +1,6 @@
-;; +extensions/yaml.el
+;; +ext/yaml.el
 
-(defun jem-extensions-yaml|init ()
+(defun jem-ext-yaml|init ()
   (use-package yaml-mode
     :mode (("\\.yaml\\'" . yaml-mode)
            ("\\.yml\\'" . yaml-mode)

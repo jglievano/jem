@@ -1,5 +1,5 @@
-;; csv.el
+;; +ext/csv.el
 
-(defun jem-extensions-csv|init ()
+(defun jem-ext-csv|init ()
   (use-package csv-mode
     :mode "\\.csv\\'"))
