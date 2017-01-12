@@ -184,6 +184,13 @@ If the universal prefix argument is used then kill the buffer too."
         (message "Indented buffer.")))
     (whitespace-cleanup)))
 
+(defun jem-kill-this-buffer (&optional arg)
+  "Kill the current buffer."
+  (interactive "P")
+  (if (window-minibuffer-p)
+      (abort-recursive-edit)
+    (kill-buffer)))
+
 (defun jem-new-empty-buffer ()
   "Create a new buffer called untitled(<n>)"
   (interactive)
