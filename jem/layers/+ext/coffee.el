@@ -3,4 +3,4 @@
 (defun jem-ext-coffee|init ()
   (use-package coffee-mode
     :mode (("\\.coffee\\'" . coffee-mode)
-           ("\\.iced\\" . coffee-mode))))
+           ("\\.iced\\'" . coffee-mode))))
