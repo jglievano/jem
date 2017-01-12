@@ -19,6 +19,12 @@
 (defconst jem-leader-key "SPC"
   "Evil leader key.")
 
+(defconst jem-themes '("blackboard"
+                       "dracula"
+                       "ujelly"
+                       "zenburn")
+  "List of themes available for Jem.")
+
 (defconst jem-third-party-directory
   (expand-file-name (concat user-emacs-directory "third-party/"))
   "Path to jem third-party directory.")
