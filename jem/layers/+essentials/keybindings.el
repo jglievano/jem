@@ -5,6 +5,7 @@
                                   ("d" "debug")
                                   ("e" "emacs")
                                   ("f" "files")
+                                  ("g" "git")
                                   ("h" "help")
                                   ("hd" "help-describe")
                                   ("t" "text")
