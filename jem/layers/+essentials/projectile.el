@@ -36,25 +36,5 @@
                                         "projectile.cache")
           projectile-known-projects-file (concat jem-cache-directory
                                                  "projectile-bookmarks.eld"))
-    (jem-set-leader-keys
-      "pb" 'projectile-switch-to-buffer
-      "pd" 'projectile-find-dir
-      "pf" 'projectile-find-file
-      "pF" 'projectile-find-file-dwim
-      "pr" 'projectile-recentf
-      "pp" 'projectile-switch-project
-      "pv" 'projectile-vc
-      "p!" 'projectile-run-shell-command-in-root
-      "p&" 'projectile-run-async-shell-command-in-root
-      "p%" 'projectile-replace-regexp
-      "pa" 'projectile-toggle-between-implementation-and-test
-      "pc" 'projectile-compile-project
-      "pD" 'projectile-dired
-      "pg" 'projectile-find-tag
-      "p C-g" 'projectile-regenerate-tags
-      "pI" 'projectile-invalidate-cache
-      "pk" 'projectile-kill-buffers
-      "pR" 'projectile-replace
-      "pT" 'projectile-test-project)
     (projectile-global-mode 1)
     (jem-hide-lighter projectile-mode)))

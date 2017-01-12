@@ -87,6 +87,8 @@
   ;; Loading packages from +root is mandatory.
   (jem-activate-layer "root")
   (jem-activate-layer "essentials")
+  (jem-activate-layer "ido")
+  (jem-activate-layer "git")
 ;;  (jem-activate-layer "ivy")
 
   (if (and (fboundp 'server-running-p)

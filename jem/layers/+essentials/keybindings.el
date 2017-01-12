@@ -56,6 +56,7 @@
   (jem-set-leader-keys
     "fc" 'jem-copy-file
     "fd" 'jem-delete-current-buffer-file
+    "ff" 'find-file
     "fF" 'jem-open-file-or-directory-in-external-app
     "fr" 'jem-rename-current-buffer-file
     "fs" 'save-buffer)
@@ -72,6 +73,16 @@
     "hdt" 'describe-theme
     "hdv" 'describe-variable
     "hn" 'view-emacs-news)
+
+  (jem-set-leader-keys
+    "pd" 'projectile-find-dir
+    "pf" 'projectile-find-file
+    "pr" 'projectile-recentf
+    "p!" 'projectile-run-shell-command-in-root
+    "p%" 'projectile-replace-regexp
+    "pc" 'projectile-compile-project
+    "pK" 'projectile-kill-buffers
+    "pp" 'projectile-switch-project)
 
   ;; text.
   (jem-set-leader-keys
