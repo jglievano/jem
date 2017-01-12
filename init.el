@@ -12,6 +12,11 @@
 (defconst jem-emacs-min-version "24.3" "Minimum required Emacs version")
 (defconst jem-start-time (current-time))
 
+(defconst jem-load-paths '("jem"
+                           "jem/libs"
+                           "third-party"
+                           "third-party/use-package"))
+
 (if (version<= emacs-version jem-emacs-min-version)
     (message (concat "jem> Jem requires Emacs >= %s. "
                      "Your current Emacs version is %s.")
@@ -21,18 +26,23 @@
     (mapc #'(lambda (path)
               (add-to-list 'load-path
                            (expand-file-name path user-emacs-directory)))
-          '("jem" "jem/libs" "third-party" "third-party/use-package")))
+          jem-load-paths))
+  (add-to-list 'custom-theme-load-path (expand-file-name "third-party/themes"
+                                                         user-emacs-directory))
 
   (require 'jem-lib)
-  (jem-init))
+  (jem-init)
+  (load-theme 'zenburn))
+
+;; end-of-file.
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
+ '(custom-safe-themes
    (quote
-    (paredit-ext which-key hydra diminish evil bind-map bind-key async))))
+    ("c0e2640af3eac7ee8d0dd084f26ee639e8ce955b7c784392a24310d242baa5d6" default))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
