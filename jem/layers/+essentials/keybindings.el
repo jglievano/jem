@@ -61,6 +61,8 @@
     "ff" 'find-file
     "fF" 'jem-open-file-or-directory-in-external-app
     "fr" 'jem-rename-current-buffer-file
+    "fq" 'jem-save-and-kill-buffer
+    "fQ" 'jem-save-and-delete-window
     "fs" 'save-buffer)
 
   ;; help.

@@ -5,8 +5,11 @@
     :ensure t
     :defer t
     :init
-    (setq fci-rule-width 1)
-    (setq fci-rule-color "#D0BF8F")
+    (define-globalized-minor-mode jem-global-fci-mode
+      fci-mode turn-on-fci-mode)
+    (setq fci-rule-width 2)
+    (setq fci-rule-character ?▒)
+    (setq fci-rule-color "#212121")
     (setq fci-rule-column 80)
     (push '(fci-mode "") minor-mode-alist)
     (jem-add-toggle fill-column-indicator
@@ -14,4 +17,5 @@
       :on (turn-on-fci-mode)
       :off (turn-off-fci-mode)
       :documentation "Display the fill column indicator."
-      :evil-leader "tf")))
+      :evil-leader "tf")
+    (jem-global-fci-mode 1)))

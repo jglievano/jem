@@ -280,6 +280,18 @@ recentf list."
              (message "File '%s' renamed to '%s'" short-name
                      (file-name-nondirectory new-name)))))))
 
+(defun jem-save-and-delete-window (&optional arg)
+  "Saves and deletes window."
+  (interactive "P")
+  (save-buffer)
+  (delete-window))
+
+(defun jem-save-and-kill-buffer (&optional arg)
+  "Saves and kills buffer."
+  (interactive "P")
+  (save-buffer)
+  (kill-buffer))
+
 (defun jem-select-current-block ()
   "Select the current block of text between blank lines."
   (interactive)
