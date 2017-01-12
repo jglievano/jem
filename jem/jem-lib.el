@@ -13,15 +13,19 @@
 
 (defun jem-activate-layer (layer-name)
   "Activates layer with LAYER-NAME."
-  (jem-log (format "Activating %s layer." layer-name))
-  (mapcar
-   (lambda (filename)
-     (if (and (not (string= filename "."))
-              (not (string= filename "..")))
-         (let* ((package-name (replace-regexp-in-string "-boot.el" "" filename)))
-           (load (format "%s+%s/%s" jem-layers-directory layer-name filename))
-           (funcall (intern (format "jem-%s-%s|init" layer-name package-name))))))
-   (directory-files (concat jem-layers-directory "+" layer-name "/"))))
+  (let* ((activation-msg (format "Activating %s layer" layer-name)))
+    (jem-log activation-msg)
+    (jem-update-dashboard-status activation-msg)
+    (mapcar
+     (lambda (filename)
+       (if (and (not (string= filename "."))
+                (not (string= filename "..")))
+           (let* ((package-name (replace-regexp-in-string
+                                 "-boot.el" "" filename)))
+             (load (format "%s+%s/%s" jem-layers-directory layer-name filename))
+             (funcall (intern
+                       (format "jem-%s-%s|init" layer-name package-name))))))
+     (directory-files (concat jem-layers-directory "+" layer-name "/")))))
 
 (defun jem-elapsed-time ()
   "Returns the elapsed time between `current-time' and `jem-start-time'."
@@ -42,6 +46,7 @@
             (lambda ()
               (run-hooks 'jem-initialized-hook)
               (jem-log "jem startup hooks ran.")
+              (jem-update-dashboard-status "OK")
               (setq jem-initialized t))))
 
 (defun jem-init ()
@@ -60,11 +65,13 @@
   (require 'jem-dashboard-lib)
   (jem-show-dashboard)
 
+  (jem-update-dashboard-status "Loading ~/.custom.el")
   (if (file-exists-p (expand-file-name "~/.custom.el"))
       (progn
         (jem-log "Loading .custom.el")
         (load "~/.custom.el")))
 
+  (jem-update-dashboard-status "Setting up for layer installation")
   (require 'use-package)
   (setq use-package-verbose init-file-debug
         use-package-inject-hooks t)

@@ -9,6 +9,9 @@
 (defvar jem--dashboard-logs-start-line 0
   "Start line where logs display.")
 
+(defvar jem--dashboard-status ""
+  "Current dashboard status.")
+
 (defconst jem--path-to-banners (concat jem-directory "banners/")
   "Path to banners directory.")
 
@@ -48,9 +51,15 @@
   (switch-to-buffer jem-dashboard-buffer-name))
 
 (defun jem-update-dashboard-status (msg)
-  "Updates status line (first) with MSG."
+  "Updates status line (first) with MSG.
+
+If msg is nil then status does not actually change, but refreshes display."
+  (if msg
+      (setq jem--dashboard-status msg))
   (jem-insert jem-dashboard-buffer-name
-              (jem-create-centered-string (concat "[" msg "]"))))
+              (jem-create-centered-string (concat "["
+                                                  jem--dashboard-status
+                                                  "]"))))
 
 (defun jem--create-dashboard ()
   "Creates *jem* buffer."
@@ -65,7 +74,7 @@
 
     (jem--insert-banner-in-dashboard)
     (jem-append-newline jem-dashboard-buffer-name "")
-    (jem-update-dashboard-status "loaded")
+    (jem-update-dashboard-status nil)
     (setq jem--dashboard-logs-start-line
           (1+ (count-lines (point-min) (point-max))))))
 
