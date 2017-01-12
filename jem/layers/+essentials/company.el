@@ -10,7 +10,4 @@
           company-minimum-prefix-length 2
           company-require-match nil
           company-dabbrev-ignore-case nil
-          company-dabbrev-downcase nil)
-    (add-hook 'company-completion-started-hook 'company-turn-off-fci)
-    (add-hook 'company-completion-finished-hook 'company-maybe-turn-on-fci)
-    (add-hook 'company-completion-cancelled-hook 'company-maybe-turn-on-fci)))
+          company-dabbrev-downcase nil)))
