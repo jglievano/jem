@@ -21,7 +21,7 @@
     (mapc #'(lambda (path)
               (add-to-list 'load-path
                            (expand-file-name path user-emacs-directory)))
-          '("jem" "jem/libs" "third-party/use-package")))
+          '("jem" "jem/libs" "third-party" "third-party/use-package")))
 
   (require 'jem-lib)
   (jem-init))
@@ -32,7 +32,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (which-key hydra diminish evil bind-map bind-key async))))
+    (paredit-ext which-key hydra diminish evil bind-map bind-key async))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

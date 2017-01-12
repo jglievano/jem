@@ -35,6 +35,7 @@
       (company-mode 1)
       (paredit-mode 1))
     :init
+    (show-paren-mode 1)
     (mapc
      (lambda (major-mode)
        (font-lock-add-keywords
