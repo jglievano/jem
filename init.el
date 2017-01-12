@@ -34,6 +34,6 @@
 
   (require 'jem-lib)
   (jem-init)
-  (load-theme 'zenburn t))
+  (load-theme 'blackboard t))
 
 ;; end-of-file.

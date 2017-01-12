@@ -115,13 +115,6 @@
     "ts" 'jem-sort-lines
     "tu" 'jem-uniquify-lines)
 
-  ;; navigation.
-  (jem-set-leader-keys
-    "j0" 'jem-push-mark-and-goto-beginning-of-line
-    "j$" 'jem-push-mark-and-goto-end-of-line
-    "jf" 'find-function
-    "jv" 'find-variable)
-
   ;; debug..
   (jem-set-leader-keys
     "dC" 'compile
