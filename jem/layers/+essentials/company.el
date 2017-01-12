@@ -3,6 +3,7 @@
 (defun jem-essentials-company|init ()
   (use-package company
     :ensure t
+    :diminish company-mode
     :defer t
     :init
     (setq company-idle-delay 0.2

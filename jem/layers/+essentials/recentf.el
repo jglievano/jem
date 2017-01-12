@@ -10,9 +10,7 @@
                                            (recentf-track-opened-file))))
     (setq recentf-save-file (concat jem-cache-directory "recentf")
           recentf-max-saved-items 1000
-          recentf-auto-cleanup 'never
-          recentf-auto-save-timer (run-with-idle-timer 600 t
-                                                       'recentf-save-list))
+          recentf-auto-cleanup 'never)
     :config
     (add-to-list 'recentf-exclude
                  (expand-file-name jem-cache-directory))

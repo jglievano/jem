@@ -75,7 +75,30 @@
 
   ;; text.
   (jem-set-leader-keys
-    "ti" 'jem-indent-region-or-buffer)
+    "tg" 'avy-goto-line
+    "ti" 'jem-indent-region-or-buffer
+    "ta&" 'jem-align-repeat-ampersand
+    "ta(" 'jem-align-repeat-left-paren
+    "ta)" 'jem-align-repeat-right-paren
+    "ta," 'jem-align-repeat-comma
+    "ta." 'jem-align-repeat-decimal
+    "ta:" 'jem-align-repeat-colon
+    "ta;" 'jem-align-repeat-semicolon
+    "ta=" 'jem-align-repeat-equal
+    "ta\\" 'jem-align-repeat-backslash
+    "taa" 'align
+    "tac" 'align-current
+    "tam" 'jem-align-repeat-math-oper
+    "tar" 'jem-align-repeat
+    "ta|" 'jem-align-repeat-bar
+    "tdw" 'delete-trailing-whitespace
+    "tjc" 'set-justification-center
+    "tjf" 'set-justification-full
+    "tjl" 'set-justification-left
+    "tjn" 'set-justification-none
+    "tjr" 'set-justification-right
+    "ts" 'jem-sort-lines
+    "tu" 'jem-uniquify-lines)
 
   ;; navigation.
   (jem-set-leader-keys
@@ -113,6 +136,7 @@
                (symbol-value golden-ratio-mode))
       (golden-ratio)))
   (jem-set-leader-keys
+    "wa" 'ace-window
     "wb" 'jem-switch-to-minibuffer-window
     "wd" 'jem-delete-window
     "wf" 'follow-mode
@@ -129,32 +153,6 @@
     "w-" 'split-window-below
     "wV" 'split-window-right-and-focus
     "w/" 'split-window-right)
-
-  ;; text.
-  (defalias 'count-region 'count-words-region)
-  (jem-set-leader-keys
-    "ta&" 'jem-align-repeat-ampersand
-    "ta(" 'jem-align-repeat-left-paren
-    "ta)" 'jem-align-repeat-right-paren
-    "ta," 'jem-align-repeat-comma
-    "ta." 'jem-align-repeat-decimal
-    "ta:" 'jem-align-repeat-colon
-    "ta;" 'jem-align-repeat-semicolon
-    "ta=" 'jem-align-repeat-equal
-    "ta\\" 'jem-align-repeat-backslash
-    "taa" 'align
-    "tac" 'align-current
-    "tam" 'jem-align-repeat-math-oper
-    "tar" 'jem-align-repeat
-    "ta|" 'jem-align-repeat-bar
-    "tdw" 'delete-trailing-whitespace
-    "tjc" 'set-justification-center
-    "tjf" 'set-justification-full
-    "tjl" 'set-justification-left
-    "tjn" 'set-justification-none
-    "tjr" 'set-justification-right
-    "ts" 'jem-sort-lines
-    "tu" 'jem-uniquify-lines)
 
   ;; shell.
   (with-eval-after-load 'shell

@@ -20,8 +20,7 @@
      (lambda (filename)
        (if (and (not (string= filename "."))
                 (not (string= filename "..")))
-           (let* ((package-name (replace-regexp-in-string
-                                 "-boot.el" "" filename)))
+           (let* ((package-name (replace-regexp-in-string "\\.el" "" filename)))
              (load (format "%s+%s/%s" jem-layers-directory layer-name filename))
              (funcall (intern
                        (format "jem-%s-%s|init" layer-name package-name))))))
@@ -88,7 +87,7 @@
   ;; Loading packages from +root is mandatory.
   (jem-activate-layer "root")
   (jem-activate-layer "essentials")
-  (jem-activate-layer "ivy")
+;;  (jem-activate-layer "ivy")
 
   (if (and (fboundp 'server-running-p)
            (not (server-running-p)))
