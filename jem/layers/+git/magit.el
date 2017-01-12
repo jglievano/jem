@@ -5,5 +5,5 @@
     :ensure t
     :config
     (jem-set-leader-keys
-      "gs" 'magit-status
-      "gS" 'magit-status-with-prefix)))
+      "gl" 'magit-log-buffer-file
+      "gs" 'magit-status)))
