@@ -50,6 +50,7 @@
 
   ;; emacs.
   (jem-set-leader-keys
+    "SPC" 'smex
     "ek" 'jem-switch-to-scratch-buffer
     "eq" 'jem-prompt-kill-emacs)
 
