@@ -1,5 +1,5 @@
 ;; JEM
-;; init.el - start
+;; init.el
 
 
 ;; Added by Package.el.  This must come before configurations of
@@ -34,6 +34,6 @@
 
   (require 'jem-lib)
   (jem-init)
-  (load-theme 'blackboard t))
+  (load-theme 'zenburn t))
 
 ;; end-of-file.
