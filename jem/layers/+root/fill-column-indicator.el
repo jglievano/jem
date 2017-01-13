@@ -11,7 +11,7 @@
     (setq fci-rule-character ?▒)
     (setq fci-rule-color "#212121")
     (setq fci-rule-column 80)
-    (push '(fci-mode "") minor-mode-alist)
+    (add-hook 'prog-mode-hook 'turn-on-fci-mode)
     (jem-add-toggle fill-column-indicator
       :status fci-mode
       :on (turn-on-fci-mode)
